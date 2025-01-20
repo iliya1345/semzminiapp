@@ -58,7 +58,7 @@ export async function POST(request: Request) {
         ],
       };
 
-      // send the image with caption
+      // send the image with captions
       const photoResponse = await fetch(
         `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`,
         {
