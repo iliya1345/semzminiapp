@@ -1,0 +1,27 @@
+{
+  "uid": "nLUBgHJ9n5d1tHKSleQGcU8HC3s1",
+  "email": "telegram7225894193@telegram.com",
+  "emailVerified": true,
+  "displayName": "7225894193",
+  "isAnonymous": false,
+  "providerData": [],
+  "stsTokenManager": {
+    "refreshToken": "AMf-vBzpmaXmEgvdJuOeIHR_y8J_1sG1t9SkxD7ClF2Wy6z3BzxLO0k4DNAgu11_6fFHaQ6kJ4OYMtsZlFsDvreVoXusTy4dPkeaYyphS1bzN4H19-xgvx8gJCwhtOw37VHBNQAiEABG3NhCLUldTurfFziMWmcl-jk1vwkcgjPCrWeHTRZQsBPMi5qTicnLM-_gCPF1pgS5IxUTRkqagQsX4hGSi9Jjew",
+    "accessToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlNTIxYmY1ZjdhNDAwOGMzYmQ3MjFmMzk2OTcwOWI1MzY0MzA5NjEiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiNzIyNTg5NDE5MyIsInRlbGVncmFtSWQiOjcyMjU4OTQxOTMsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90ZXRoZXJydXNoIiwiYXVkIjoidGV0aGVycnVzaCIsImF1dGhfdGltZSI6MTczMTk0OTgwNCwidXNlcl9pZCI6Im5MVUJnSEo5bjVkMXRIS1NsZVFHY1U4SEMzczEiLCJzdWIiOiJuTFVCZ0hKOW41ZDF0SEtTbGVRR2NVOEhDM3MxIiwiaWF0IjoxNzMxOTQ5ODA0LCJleHAiOjE3MzE5NTM0MDQsImVtYWlsIjoidGVsZWdyYW03MjI1ODk0MTkzQHRlbGVncmFtLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbInRlbGVncmFtNzIyNTg5NDE5M0B0ZWxlZ3JhbS5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJjdXN0b20ifX0.nTrAqI4GkAej5Qqa88wxuKFMMOCwG-S80wNnLNAaEaQAREsH3m68KlSp_2Z0C6aVKm1szthpMInIgkOKU--V7RLNbSv9Pywe34Ub24ZrLEgGrSS6zoqwr1Wx8ClmvaosPtWPfZalUR2_1x9GooBAtUmDmR0yfVsgdx2uff_5uQ_BgoAzSNEMNaHfpN52_n4G_1cpUjd3EnVv_WSeLAJLXMAeXTtLBEMucAEJPKy0VYtTP-Xe5iSAhGTPK-oDSdlO0p0DUQz1Vpj74HqBUoG2M0LkaS6EbeEf6N3jDnwg5SoWf7Fsr8vTPY7DJ80XOvNlwJ0yrENvUmEINwZOlAft5Q",
+    "expirationTime": 1731953408728
+  },
+  "createdAt": "1731949803036",
+  "lastLoginAt": "1731949804578",
+  "apiKey": "AIzaSyBExRfZiVRlXDG7bCwEzWsh-_DiSDmtBNs",
+  "appName": "[DEFAULT]"
+}
+
+{
+  "referrals": 0,
+  "lastName": "Ansari",
+  "id": 7225894193,
+  "firstName": "Ayan",
+  "balance": 201,
+  "username": "notrealayan",
+  "lastClaimTime": null
+}
