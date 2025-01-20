@@ -39,7 +39,7 @@ export async function POST(request: Request) {
 
       const welcomeMessage = `Every Click in Telegram Matters!
       
-      Collect SEMZ🫎 and convert to TON`;
+Collect SEMZ🫎 and convert to TON`;
 
       const inlineKeyboard = {
         inline_keyboard: [
