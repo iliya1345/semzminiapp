@@ -33,8 +33,7 @@ function Leaders() {
             Leaderboard
           </h1>
           <p className="text-muted-foreground">
-            {leaderboard?.length || 0 + 200000}
-            users
+            {leaderboard?.length && leaderboard.length + 200000} users
           </p>
         </div>
 
