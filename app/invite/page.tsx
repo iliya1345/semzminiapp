@@ -15,7 +15,7 @@ function ReferralPage() {
   const referralUrl = `${process.env.NEXT_PUBLIC_TELEGRAM_MINIAPP_URL}?startapp=${userData?.id}`;
 
   const handleShare = () => {
-    const textToShare = "Check out my referral link!";
+    const textToShare = "Collect SEMZ🫎 and convert to TON";
     const tgShareUrl = `https://t.me/share/url?url=${encodeURIComponent(
       referralUrl
     )}&text=${encodeURIComponent(textToShare)}`;
