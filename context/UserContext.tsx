@@ -23,6 +23,7 @@ interface UserData {
   balance: number;
   username: string;
   tasks: string[] | null;
+  users: number | null;
 }
 
 interface LeaderboardData {

@@ -1,7 +1,13 @@
 // Firebase Initialization
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithCustomToken } from "firebase/auth";
-import { collection, getDocs, getFirestore } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+} from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -29,3 +35,28 @@ export const getCollectionDocIds = async (path: string): Promise<string[]> => {
     throw error;
   }
 };
+
+export async function getDocumentValue(
+  collectionName: string,
+  documentId: string,
+  fieldName: string
+) {
+  try {
+    // Reference the specific document
+    const docRef = doc(db, collectionName, documentId);
+
+    // Get the document snapshot
+    const docSnap = await getDoc(docRef);
+
+    // Check if document exists and has the field
+    if (docSnap.exists()) {
+      return docSnap.data()[fieldName];
+    } else {
+      console.error("No such document!");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting document:", error);
+    return null;
+  }
+}

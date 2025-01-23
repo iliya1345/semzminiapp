@@ -1,11 +1,13 @@
 "use client";
 import NavBar from "@/components/navbar";
 import { Card, CardContent } from "@/components/ui/card";
+import { useUserContext } from "@/context/UserContext";
 import { fetchLeaderboard } from "@/utils/fetchLeaderboard";
 import { Loader2, Medal, Trophy } from "lucide-react";
 import React from "react";
 
 function Leaders() {
+  const { userData } = useUserContext();
   const { leaderboard, error, loading } = fetchLeaderboard();
   if (error) {
     return (
@@ -32,9 +34,7 @@ function Leaders() {
           <h1 className="text-3xl font-bold tracking-tight mb-2">
             Leaderboard
           </h1>
-          <p className="text-muted-foreground">
-            {leaderboard?.length && leaderboard.length + 200000} users
-          </p>
+          <p className="text-muted-foreground">{userData?.users} users</p>
         </div>
 
         {/* Leaderboard Section */}

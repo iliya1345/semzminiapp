@@ -6,7 +6,7 @@ import HomeScreen from "@/components/pages/HomeScreen";
 import LoadingScreen from "@/components/LoadingScreen";
 import NavBar from "@/components/navbar";
 import { useUserContext } from "@/context/UserContext";
-import { getCollectionDocIds } from "@/utils/firebase";
+import { getCollectionDocIds, getDocumentValue } from "@/utils/firebase";
 
 interface UserData {
   referrals: number;
@@ -33,6 +33,15 @@ export default function Home() {
         }
 
         let tasks: string[] | null = null;
+        let users: number | null = null;
+
+        try {
+          users = await getDocumentValue("userCount", "0", "count");
+          users = users ? 0 : null;
+        } catch (error) {
+          console.error("Error fetching task IDs:", error);
+        }
+
         try {
           const fetchedTaskIds = await getCollectionDocIds(
             `users/${name}/tasks`
@@ -45,7 +54,7 @@ export default function Home() {
         // Cast the fetched data to the UserData type
         const typedData = data as UserData;
 
-        setUserData({ ...typedData, tasks });
+        setUserData({ ...typedData, tasks, users });
 
         setUser({
           isLoggedIn: true,
