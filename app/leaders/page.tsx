@@ -2,6 +2,7 @@
 import NavBar from "@/components/navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useUserContext } from "@/context/UserContext";
+import { formatNumberWithCommas } from "@/lib/utils";
 import { fetchLeaderboard } from "@/utils/fetchLeaderboard";
 import { Loader2, Medal, Trophy } from "lucide-react";
 import React from "react";
@@ -34,7 +35,9 @@ function Leaders() {
           <h1 className="text-3xl font-bold tracking-tight mb-2">
             Leaderboard
           </h1>
-          <p className="text-muted-foreground">{userData?.users} users</p>
+          <p className="text-muted-foreground">
+            {formatNumberWithCommas(userData?.users || 0)} users
+          </p>
         </div>
 
         {/* Leaderboard Section */}
@@ -78,7 +81,7 @@ function Leaders() {
                       <span className="font-medium">{user.name}</span>
                     </div>
                     <span className="text-sm text-muted-foreground">
-                      {user.balance.toFixed(2)} SEMZ
+                      {formatNumberWithCommas(user.balance)} SEMZ
                     </span>
                   </div>
                 </div>

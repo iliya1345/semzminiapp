@@ -58,7 +58,7 @@ function ReferralPage() {
                 <div className="flex items-center gap-1">
                   <span className="font-mono font-semibold">
                     {(userData?.referrals &&
-                      (userData?.referrals * 500).toFixed(0)) ||
+                      (userData?.referrals * 500).toFixed()) ||
                       0}{" "}
                     SEMZ
                   </span>

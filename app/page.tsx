@@ -15,56 +15,52 @@ interface UserData {
   firstName: string;
   balance: number;
   username: string;
+  tasks: string[] | null;
+  users: number | null;
 }
 
 export default function Home() {
   const { user, setUser, userData, setUserData } = useUserContext();
 
+  const fetchAdditionalUserData = async (
+    userName: string
+  ): Promise<Partial<UserData>> => {
+    try {
+      const usersCount = await getDocumentValue("userCount", "0", "count");
+      const fetchedTaskIds = await getCollectionDocIds(
+        `users/${userName}/tasks`
+      );
+      console.log("fetchedTaskIds", usersCount);
+
+      return {
+        tasks: fetchedTaskIds.length > 0 ? fetchedTaskIds : null,
+        users: usersCount,
+      };
+    } catch (error) {
+      console.error("Error fetching additional user data:", error);
+      return {};
+    }
+  };
+
   const handleLogin = async () => {
     try {
-      const name = await loginWithTelegram();
+      const userName = await loginWithTelegram();
+      if (!userName) return;
 
-      if (name) {
-        // Fetch document data from Firestore
-        const data = await getDocumentData("users", name);
+      const userData = await getDocumentData("users", userName);
+      if (!userData) throw new Error("User data not found");
 
-        if (!data) {
-          throw new Error("User data not found");
-        }
+      const additionalData = await fetchAdditionalUserData(userName);
 
-        let tasks: string[] | null = null;
-        let users: number | null = null;
+      const completeUserData = {
+        ...(userData as UserData),
+        ...additionalData,
+      };
 
-        try {
-          users = await getDocumentValue("userCount", "0", "count");
-          users = users ? 0 : null;
-        } catch (error) {
-          console.error("Error fetching task IDs:", error);
-        }
-
-        try {
-          const fetchedTaskIds = await getCollectionDocIds(
-            `users/${name}/tasks`
-          );
-          tasks = fetchedTaskIds.length > 0 ? fetchedTaskIds : null;
-        } catch (tasksError) {
-          console.error("Error fetching task IDs:", tasksError);
-        }
-
-        // Cast the fetched data to the UserData type
-        const typedData = data as UserData;
-
-        setUserData({ ...typedData, tasks, users });
-
-        setUser({
-          isLoggedIn: true,
-          userId: name,
-        });
-
-        console.log("User data:", typedData);
-      }
+      setUserData(completeUserData);
+      setUser({ isLoggedIn: true, userId: userName });
     } catch (error) {
-      console.error("Login failed or data fetch error:", error);
+      console.error("Login or data fetch error:", error);
     }
   };
 
@@ -74,9 +70,7 @@ export default function Home() {
     }
   }, [user.isLoggedIn]);
 
-  if (!user.isLoggedIn) {
-    return <LoadingScreen />;
-  }
+  if (!user.isLoggedIn) return <LoadingScreen />;
 
   return (
     <div>
@@ -89,7 +83,6 @@ export default function Home() {
             username={userData.username || ""}
             balance={userData.balance}
           />
-          {/* Nav Bar */}
           <NavBar page="Home" />
         </>
       ) : (

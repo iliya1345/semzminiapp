@@ -17,7 +17,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { formatText } from "@/lib/utils";
+import { formatNumberWithCommas, formatText } from "@/lib/utils";
 import { incrementField, updateDocument } from "@/utils/firebaseUtils";
 import { useUserContext } from "@/context/UserContext";
 import Link from "next/link";
@@ -134,7 +134,9 @@ export default function HomeScreen({
           <img src="/semzlogo.png" alt="" className="h-56 w-56" />
 
           <div className="flex items-center  gap-1 mt-4">
-            <h1 className="text-5xl font-semibold">{balance.toFixed(0)}</h1>
+            <h1 className="text-5xl font-semibold">
+              {formatNumberWithCommas(balance)}
+            </h1>
             <h3 className="text-white text-xl text-center">SEMZ</h3>
           </div>
         </div>
