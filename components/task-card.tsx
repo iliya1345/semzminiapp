@@ -147,12 +147,12 @@ export default function TaskCard({ task }: TaskCardProps) {
           variant="secondary"
           className="bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
         >
-          {task.type === "Referral" ? (
-            "Check"
-          ) : isLoading ? (
+          {isLoading ? (
             <Loader2 className="animate-spin" />
           ) : task.isClaimed ? (
             <Check className="animate-pulse" />
+          ) : task.type === "Referral" ? (
+            "Check"
           ) : status === "go" ? (
             "Go"
           ) : status === "claim" ? (
