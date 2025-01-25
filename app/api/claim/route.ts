@@ -135,7 +135,7 @@ export async function POST(req: Request) {
     // Check if it's a referral task
     if (type == "Referral") {
       const refs = userDoc.data()?.referrals || 0;
-      if (refs <= Number(url)) {
+      if (refs < Number(url)) {
         return NextResponse.json(
           { error: "not enough referrals" },
           { status: 400 }
