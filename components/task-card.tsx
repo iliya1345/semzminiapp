@@ -12,6 +12,7 @@ interface TaskCardProps {
     reward: number;
     url: string;
     isClaimed: boolean;
+    type: string | null;
   };
 }
 
@@ -96,6 +97,15 @@ export default function TaskCard({ task }: TaskCardProps) {
     }
   }
 
+  const getIconSrc = () => {
+    if (task.url.includes("x.com")) return "/x.png";
+    if (task.url.includes("t.me")) return "/tg.png";
+    if (task.url.includes("linkedin.com")) return "/linkdin.png";
+    if (task.url.includes("instagram.com")) return "/ig.png";
+    if (task.url.includes("facebook.com")) return "/fb.png";
+    return "/semz.png";
+  };
+
   return (
     <div
       className={cn(
@@ -103,6 +113,15 @@ export default function TaskCard({ task }: TaskCardProps) {
       )}
     >
       <div className="flex items-center gap-3">
+        <div className="flex h-8 w-8 items-center justify-center">
+          <img
+            src={getIconSrc()}
+            height={50}
+            width={50}
+            alt="AP"
+            className="h-8 w-8 rounded-sm"
+          />
+        </div>
         <div className="flex flex-col">
           <h3 className="text-sm font-medium text-zinc-100">{task.title}</h3>
           <p className="text-xs text-zinc-400">+{task.reward} SEMZ</p>
@@ -118,11 +137,19 @@ export default function TaskCard({ task }: TaskCardProps) {
             isLoading ||
             (status !== "go" && status !== "claim")
           }
-          onClick={() => (status === "go" ? handleGoClick() : claimTask())}
+          onClick={() =>
+            task.type === "Referral"
+              ? claimTask()
+              : status === "go"
+              ? handleGoClick()
+              : claimTask()
+          }
           variant="secondary"
           className="bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
         >
-          {isLoading ? (
+          {task.type === "Referral" ? (
+            "Check"
+          ) : isLoading ? (
             <Loader2 className="animate-spin" />
           ) : task.isClaimed ? (
             <Check className="animate-pulse" />

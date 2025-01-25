@@ -10,6 +10,7 @@ interface Task {
   reward: number;
   url: string;
   isClaimed: boolean;
+  type: string | null;
 }
 
 export const fetchTasks = () => {
@@ -38,6 +39,7 @@ export const fetchTasks = () => {
           reward: data.reward,
           url: data.url,
           isClaimed: userData?.tasks?.includes(doc.id) || false,
+          type: data.type || null,
         };
       });
 

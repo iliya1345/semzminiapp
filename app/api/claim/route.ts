@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 interface TaskData {
   type?: string;
   url?: string;
+
   reward: number;
 }
 
@@ -126,6 +127,17 @@ export async function POST(req: Request) {
       if (!isMember) {
         return NextResponse.json(
           { error: "You must join the channel/group to claim rewards." },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Check if it's a referral task
+    if (type == "Referral") {
+      const refs = userDoc.data()?.referrals || 0;
+      if (refs <= Number(url)) {
+        return NextResponse.json(
+          { error: "not enough referrals" },
           { status: 400 }
         );
       }

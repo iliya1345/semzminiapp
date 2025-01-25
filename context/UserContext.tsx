@@ -13,6 +13,7 @@ interface Task {
   reward: number;
   url: string;
   isClaimed: boolean;
+  type: string | null;
 }
 
 interface UserData {
