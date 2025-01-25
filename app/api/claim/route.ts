@@ -80,7 +80,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check if it's a Telegram task
+    // Check if it's a Telegram tasks
     if (type == "TG" || type == "Telegram") {
       if (!url) {
         return NextResponse.json(
