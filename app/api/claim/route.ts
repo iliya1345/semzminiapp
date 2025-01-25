@@ -70,13 +70,65 @@ export async function POST(req: Request) {
     }
 
     const taskData = taskDoc.data() as TaskData;
-    const { reward } = taskData;
+    const { type, url, reward } = taskData;
 
     if (!reward) {
       return NextResponse.json(
         { error: "Invalid task configuration" },
         { status: 400 }
       );
+    }
+
+    // Check if it's a Telegram task
+    if (type == "TG" || type == "Telegram") {
+      if (!url) {
+        return NextResponse.json(
+          { error: "Channel link required for Telegram tasks" },
+          { status: 400 }
+        );
+      }
+
+      // Extract channel username and verify membership
+      const channelUsername = url
+        .replace("https://t.me/", "")
+        .replace("@", "")
+        .split("/")[0];
+
+      // Get chat information
+      const chatInfoResponse = await fetch(
+        `https://api.telegram.org/bot${process.env.BOT_TOKEN}/getChat?chat_id=@${channelUsername}`
+      );
+      const chatInfo = await chatInfoResponse.json();
+
+      if (!chatInfo.ok) {
+        return NextResponse.json(
+          { error: "Invalid channel or group" },
+          { status: 400 }
+        );
+      }
+
+      // Check user membership
+      const memberResponse = await fetch(
+        `https://api.telegram.org/bot${process.env.BOT_TOKEN}/getChatMember?chat_id=${chatInfo.result.id}&user_id=${userId}`
+      );
+      const memberInfo = await memberResponse.json();
+
+      if (!memberInfo.ok) {
+        return NextResponse.json(
+          { error: "Failed to verify membership" },
+          { status: 400 }
+        );
+      }
+
+      const status = memberInfo.result.status;
+      const isMember = ["creator", "administrator", "member"].includes(status);
+
+      if (!isMember) {
+        return NextResponse.json(
+          { error: "You must join the channel/group to claim rewards." },
+          { status: 400 }
+        );
+      }
     }
 
     // Create batch to update both documents atomically
