@@ -85,7 +85,7 @@ export default function TaskCard({ task }: TaskCardProps) {
             };
           });
 
-          WebApp.showAlert(`Claimed ${data.reward} AP successfully!`);
+          WebApp.showAlert(`Claimed ${data.reward} SEMZ successfully!`);
           setStatus("claim");
         }
       } catch (error: any) {
@@ -118,7 +118,7 @@ export default function TaskCard({ task }: TaskCardProps) {
             src={getIconSrc()}
             height={50}
             width={50}
-            alt="AP"
+            alt="SEMZ"
             className="h-8 w-8 rounded-sm"
           />
         </div>
