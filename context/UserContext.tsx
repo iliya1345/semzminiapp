@@ -13,6 +13,7 @@ interface Task {
   reward: number;
   url: string;
   isClaimed: boolean;
+  icon?: string;
   type: string | null;
 }
 

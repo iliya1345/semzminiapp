@@ -9,6 +9,7 @@ interface Task {
   title: string;
   reward: number;
   url: string;
+  icon?: string;
   isClaimed: boolean;
   type: string | null;
 }
@@ -38,6 +39,7 @@ export const fetchTasks = () => {
           title: data.title,
           reward: data.reward,
           url: data.url,
+          icon: data.icon || null,
           isClaimed: userData?.tasks?.includes(doc.id) || false,
           type: data.type || null,
         };

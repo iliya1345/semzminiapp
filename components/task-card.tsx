@@ -11,6 +11,7 @@ interface TaskCardProps {
     title: string;
     reward: number;
     url: string;
+    icon?: string;
     isClaimed: boolean;
     type: string | null;
   };
@@ -99,11 +100,11 @@ export default function TaskCard({ task }: TaskCardProps) {
 
   const getIconSrc = () => {
     if (task.url.includes("x.com")) return "/x.png";
-    if (task.url.includes("t.me")) return "/tg.png";
-    if (task.url.includes("linkedin.com")) return "/linkdin.png";
+    if (task.url.includes("t.me") && !task.icon) return "/tg.png";
+    if (task.url.includes("linkedin.com") && !task.icon) return "/linkdin.png";
     if (task.url.includes("instagram.com")) return "/ig.png";
     if (task.url.includes("facebook.com")) return "/fb.png";
-    return "/semz.png";
+    return task.icon || "/ape.png";
   };
 
   return (
