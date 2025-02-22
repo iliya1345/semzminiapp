@@ -1,18 +1,11 @@
 "use client";
 import WebApp from "@twa-dev/sdk";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signInWithCustomToken,
-  User,
-} from "firebase/auth";
-import app from "./firebase";
-
-const auth = getAuth(app);
+import { supabase } from "./supabaseClient"; // Ensure this is the initialized supabase client
 
 function isAndroid(): boolean {
   return /Android/i.test(navigator.userAgent);
 }
+
 /**
  * Logs in a user with Telegram and returns their display name.
  *
@@ -20,18 +13,19 @@ function isAndroid(): boolean {
  */
 export async function loginWithTelegram(): Promise<string | null> {
   return new Promise(async (resolve, reject) => {
-    // Detect Android devices
     const androidDevice = isAndroid();
 
+    // For non-Android devices: Check if the user is already authenticated
     if (!androidDevice) {
-      // Non-Android devices: Check if the user is already authenticated
-      auth.onAuthStateChanged(async (user) => {
-        if (user) {
-          console.log("User is already signed in:", user);
-          resolve(user.displayName || null); // Return displayName if available
-          return;
-        }
-      });
+      const { data: session } = await supabase.auth.getSession();
+      // @ts-ignore
+      const user = session?.user;
+
+      if (user) {
+        console.log("User is already signed in:", user);
+        resolve(user.user_metadata?.name || null); // Use 'user_metadata' to access profile info
+        return;
+      }
     }
 
     // If it's an Android device or user is not authenticated, log in again
@@ -43,6 +37,7 @@ export async function loginWithTelegram(): Promise<string | null> {
           throw new Error("Telegram WebApp init data is missing.");
         }
 
+        // Send initData to your API to verify Telegram login and get a token
         const response = await fetch("/api/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -59,12 +54,18 @@ export async function loginWithTelegram(): Promise<string | null> {
           throw new Error("No token received from the server.");
         }
 
-        await signInWithCustomToken(auth, token);
-        const currentUser = auth.currentUser;
+        // Sign in with the token using Supabase
+        // @ts-ignore
+        const { data, error } = await supabase.auth.signInWithIdToken({ token });
 
+        if (error) {
+          throw new Error(`Sign-in error: ${error.message}`);
+        }
+
+        const currentUser = data?.user;
         if (currentUser) {
           console.log("Successfully logged in!");
-          resolve(currentUser.displayName || null); // Return displayName if available
+          resolve(currentUser.user_metadata?.name || null); // Return displayName if available
         } else {
           reject("No user information available after sign-in.");
         }

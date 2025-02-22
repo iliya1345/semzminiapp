@@ -1,13 +1,11 @@
-import { db } from "@/utils/firebaseAdmin";
-import { validateHash } from "@/utils/validateHash";
-import { FieldValue } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
+import { supabase } from "@/utils/supabaseClient"; // Ensure supabase is initialized
+import { validateHash } from "@/utils/validateHash";
 
 // Define interface for task data
 interface TaskData {
   type?: string;
   url?: string;
-
   reward: number;
 }
 
@@ -36,41 +34,45 @@ export async function POST(req: Request) {
 
     const userId = validationResult.user?.id?.toString() || "";
 
-    // Get references
-    const userRef = db.collection("users").doc(userId);
-    const taskRef = db.collection("tasks").doc(taskId);
-    const userTaskRef = db
-      .collection("users")
-      .doc(userId)
-      .collection("tasks")
-      .doc(taskId);
+    // Fetch user, task, and userTask data using Supabase
+    const { data: user, error: userError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
 
-    // Get user, task, and userTask data in parallel
-    const [userDoc, taskDoc, userTaskDoc] = await Promise.all([
-      userRef.get(),
-      taskRef.get(),
-      userTaskRef.get(),
-    ]);
+    const { data: task, error: taskError } = await supabase
+      .from("tasks")
+      .select("*")
+      .eq("id", taskId)
+      .single();
+
+    const { data: userTask, error: userTaskError } = await supabase
+      .from("user_tasks")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("task_id", taskId)
+      .single();
 
     // Check if user exists
-    if (!userDoc.exists) {
+    if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if task exists
-    if (!taskDoc.exists) {
+    if (!task) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
     }
 
     // Check if user has already completed this task
-    if (userTaskDoc.exists) {
+    if (userTask) {
       return NextResponse.json(
         { error: "Task already claimed" },
         { status: 400 }
       );
     }
 
-    const taskData = taskDoc.data() as TaskData;
+    const taskData = task as TaskData;
     const { type, url, reward } = taskData;
 
     if (!reward) {
@@ -80,7 +82,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check if it's a Telegram tasks
+    // Check if it's a Telegram task
     if (type == "TG" || type == "Telegram") {
       if (!url) {
         return NextResponse.json(
@@ -89,13 +91,12 @@ export async function POST(req: Request) {
         );
       }
 
-      // Extract channel username and verify membership
       const channelUsername = url
         .replace("https://t.me/", "")
         .replace("@", "")
         .split("/")[0];
 
-      // Get chat information
+      // Get chat information from Telegram API
       const chatInfoResponse = await fetch(
         `https://api.telegram.org/bot${process.env.BOT_TOKEN}/getChat?chat_id=@${channelUsername}`
       );
@@ -134,31 +135,30 @@ export async function POST(req: Request) {
 
     // Check if it's a referral task
     if (type == "Referral") {
-      const refs = userDoc.data()?.referrals || 0;
+      const refs = user.referrals || 0;
       if (refs < Number(url)) {
         return NextResponse.json(
-          { error: "not enough referrals" },
+          { error: "Not enough referrals" },
           { status: 400 }
         );
       }
     }
 
-    // Create batch to update both documents atomically
-    const batch = db.batch();
+    // Update user balance and insert task completion record
+    const { error: updateError } = await supabase.from("users").update({
+      balance: user.balance + reward,
+    }).eq("id", userId);
 
-    // Update user's points
-    batch.update(userRef, {
-      balance: FieldValue.increment(reward),
-    });
-
-    // Create task completion record
-    batch.set(userTaskRef, {
-      completedAt: FieldValue.serverTimestamp(),
+    const { error: taskErrorInsert } = await supabase.from("user_tasks").insert({
+      user_id: userId,
+      task_id: taskId,
+      completed_at: new Date().toISOString(),
       reward: reward,
     });
 
-    // Commit the batch
-    await batch.commit();
+    if (updateError || taskErrorInsert) {
+      throw new Error(updateError?.message || taskErrorInsert?.message);
+    }
 
     // Return success response
     return NextResponse.json({

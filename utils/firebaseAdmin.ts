@@ -1,15 +1,11 @@
-import * as admin from "firebase-admin";
+import { createClient } from "@supabase/supabase-js";
 
-const serviceAccount = JSON.parse(
-  process.env.FIREBASE_SERVICE_ACCOUNT_KEY as string
-);
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+const supabaseServiceKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
 
-// Initialize Firebase Admin if it hasn't been initialized
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
-}
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-export const auth = admin.auth();
-export const db = admin.firestore();
+// Export authentication and database services
+export const auth = supabase.auth;
+export const db = supabase; // Supabase doesn't have a separate Firestore-like API, you directly use the supabase client for database operations.

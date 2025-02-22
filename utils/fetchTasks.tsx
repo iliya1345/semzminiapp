@@ -1,7 +1,6 @@
 "use client";
-import { collection, getDocs, DocumentData } from "firebase/firestore";
-import { db } from "@/utils/firebase";
 import { useState, useEffect } from "react";
+import { supabase } from "@/utils/supabaseClient"; // Make sure supabaseClient is properly initialized
 import { useUserContext } from "@/context/UserContext";
 
 interface Task {
@@ -28,22 +27,23 @@ export const fetchTasks = () => {
     setError(null);
 
     try {
-      const tasksRef = collection(db, `tasks`);
-      const snapshot = await getDocs(tasksRef);
+      const { data, error: fetchError } = await supabase
+        .from("tasks") // Assuming the table name is "tasks"
+        .select("*");
 
-      const userTasks: Task[] = snapshot.docs.map((doc) => {
-        const data = doc.data() as DocumentData;
+      if (fetchError) {
+        throw new Error(fetchError.message);
+      }
 
-        return {
-          id: doc.id,
-          title: data.title,
-          reward: data.reward,
-          url: data.url,
-          icon: data.icon || null,
-          isClaimed: userData?.tasks?.includes(doc.id) || false,
-          type: data.type || null,
-        };
-      });
+      const userTasks: Task[] = data.map((task: any) => ({
+        id: task.id,
+        title: task.title,
+        reward: task.reward,
+        url: task.url,
+        icon: task.icon || null,
+        isClaimed: userData?.tasks?.includes(task.id) || false,
+        type: task.type || null,
+      }));
 
       setTasks(userTasks);
       return userTasks;

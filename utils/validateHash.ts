@@ -32,10 +32,8 @@ export function validateHash(telegramInitData: string): ValidationResult {
     .map(([key, value]) => `${key}=${value}`)
     .join("\n");
 
-  const secretKey = crypto
-    .createHmac("sha256", "WebAppData")
-    .update(BOT_TOKEN)
-    .digest();
+  // Corrected: Use BOT_TOKEN directly for creating secretKey
+  const secretKey = crypto.createHmac("sha256", BOT_TOKEN).digest();
   const calculatedHash = crypto
     .createHmac("sha256", secretKey)
     .update(dataCheckString)

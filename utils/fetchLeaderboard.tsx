@@ -1,14 +1,6 @@
 "use client";
 import { useUserContext } from "@/context/UserContext";
-import { db } from "@/utils/firebase";
-import {
-  collection,
-  getDocs,
-  DocumentData,
-  query,
-  orderBy,
-  limit,
-} from "firebase/firestore";
+import { supabase } from "@/utils/supabaseClient"; // Supabase client import
 import { useState, useEffect } from "react";
 
 interface LeaderboardData {
@@ -31,23 +23,22 @@ export const fetchLeaderboard = () => {
     setError(null);
 
     try {
-      const leaderboardQuery = query(
-        collection(db, "users"),
-        orderBy("balance", "desc"),
-        limit(100)
-      );
+      // Fetch leaderboard data from Supabase
+      const { data, error } = await supabase
+        .from("users") // Supabase table "users"
+        .select("id, firstName, lastName, balance") // Select required fields
+        .order("balance", { ascending: false }) // Order by balance in descending order
+        .limit(100); // Limit to 100 results
 
-      const snapshot = await getDocs(leaderboardQuery);
+      if (error) {
+        throw error;
+      }
 
-      const leaderboardData: LeaderboardData[] = snapshot.docs.map((doc) => {
-        const data = doc.data() as DocumentData;
-
-        return {
-          id: doc.id,
-          name: data.firstName + " " + data.lastName,
-          balance: data.balance,
-        };
-      });
+      const leaderboardData: LeaderboardData[] = data.map((user) => ({
+        id: user.id,
+        name: `${user.firstName} ${user.lastName}`,
+        balance: user.balance,
+      }));
 
       setLeaderboardData(leaderboardData);
       return leaderboardData;

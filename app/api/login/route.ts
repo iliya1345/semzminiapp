@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { validateTelegramWebAppData } from "@/utils/telegramAuth";
-import { db, auth } from "@/utils/firebaseAdmin";
-import { FieldValue } from "firebase-admin/firestore";
+import { supabase } from "@/utils/supabaseClient";
 
 export async function POST(request: Request) {
   try {
@@ -20,66 +19,64 @@ export async function POST(request: Request) {
     const telegramId = validationResult.user.id;
     const startParam = validationResult.startParam;
     const email = `telegram${telegramId}@telegram.com`;
-    console.log("Refferer ID", startParam);
 
-    // Custom claims for Firebase
-    const customClaims = {
-      telegramId: telegramId,
-    };
+    // Check if user already exists by email
+    const { data: existingUser, error: signInError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
 
-    // Get or create Firebase user
-    let firebaseUser;
-    try {
-      firebaseUser = await auth.getUserByEmail(email);
-    } catch (error) {
-      const docRef = db.collection("users").doc(telegramId.toString());
-      const docSnapshot = await docRef.get();
-      firebaseUser = await auth.createUser({
-        email: email,
-        emailVerified: true,
-        displayName: telegramId.toString(),
+    let user = existingUser;
+
+    // If user does not exist, create new user
+    if (!existingUser && !signInError) {
+      const { data: newUser, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password: "defaultPassword", // Supabase requires a password
+        options: {
+          data: {
+            telegram_id: telegramId,
+            first_name: validationResult.user.first_name,
+            last_name: validationResult.user.last_name || "",
+            username: validationResult.user.username || "",
+            balance: 10000,
+            referrals: 0,
+          },
+        },
       });
 
-      if (!docSnapshot.exists) {
-        await docRef.set({
-          firstName: validationResult.user.first_name,
-          lastName: validationResult.user.last_name || "",
-          id: validationResult.user.id,
-          username: validationResult.user.username || "",
-          balance: 10000,
-          referrals: 0,
-        });
+      if (signUpError) {
+        throw signUpError;
+      }
 
-        //Referral Logic
-        if (startParam && startParam?.length > 4) {
-          const reffererDocRef = db.collection("users").doc(startParam);
-          const reffererFocSnapshot = await reffererDocRef.get();
-          if (reffererFocSnapshot.exists) {
-            await db.runTransaction(async (transaction) => {
-              transaction.update(reffererDocRef, {
-                balance: FieldValue.increment(500),
-                referrals: FieldValue.increment(1),
-              });
-            });
-          }
+      user = newUser.user;
+
+      // Referral Logic
+      if (startParam && startParam.length > 4) {
+        const { data: referrerUser, error: referrerError } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", startParam)
+          .single();
+
+        if (referrerUser && !referrerError) {
+          await supabase
+            .from("users")
+            .update({
+              balance: referrerUser.balance + 500,
+              referrals: referrerUser.referrals + 1,
+            })
+            .eq("id", startParam);
         }
       }
     }
 
-    // Assign custom claims
-    await auth.setCustomUserClaims(firebaseUser.uid, customClaims);
-
-    // Create custom token
-    const customToken = await auth.createCustomToken(
-      firebaseUser.uid,
-      customClaims
-    );
-
-    return NextResponse.json({ token: customToken });
+    return NextResponse.json({ user });
   } catch (error) {
     console.error("Error in login route:", error);
     return NextResponse.json(
-      { message: "Authentication failed" },
+      { message: "Authentication failed", error: error },
       { status: 500 }
     );
   }

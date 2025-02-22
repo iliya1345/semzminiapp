@@ -58,10 +58,9 @@ export function validateTelegramWebAppData(
 
   const authTimestamp = parseInt(authDate, 10);
   const currentTimestamp = Math.floor(Date.now() / 1000);
-  const timeDifference = currentTimestamp - authTimestamp;
   const fiveMinutesInSeconds = 5 * 60;
 
-  if (timeDifference > fiveMinutesInSeconds) {
+  if (currentTimestamp - authTimestamp > fiveMinutesInSeconds) {
     return {
       message: "Telegram data is older than 5 minutes",
       validatedData: null,
@@ -69,40 +68,52 @@ export function validateTelegramWebAppData(
     };
   }
 
+  // Constructing the data check string
   const dataCheckString = Array.from(initData.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, value]) => `${key}=${value}`)
     .join("\n");
 
+  // Calculate the hash
   const secretKey = crypto
-    .createHmac("sha256", "WebAppData")
-    .update(BOT_TOKEN)
+    .createHmac("sha256", BOT_TOKEN)
     .digest();
   const calculatedHash = crypto
     .createHmac("sha256", secretKey)
     .update(dataCheckString)
     .digest("hex");
 
-  if (calculatedHash === hash) {
-    validatedData = Object.fromEntries(initData.entries());
-    message = "Validation successful";
+  if (calculatedHash !== hash) {
+    return {
+      message: "Hash validation failed",
+      validatedData: null,
+      user: {},
+    };
+  }
 
-    const userString = validatedData["user"];
-    if (userString) {
-      try {
-        user = JSON.parse(userString);
-        startParam = validatedData["start_param"] || "";
-      } catch (error) {
-        console.error("Error parsing user data:", error);
-        message = "Error parsing user data";
-        validatedData = null;
-      }
-    } else {
-      message = "User data is missing";
-      validatedData = null;
+  // Validation successful
+  validatedData = Object.fromEntries(initData.entries());
+  message = "Validation successful";
+
+  const userString = validatedData["user"];
+  if (userString) {
+    try {
+      user = JSON.parse(userString);
+      startParam = validatedData["start_param"] || "";
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+      return {
+        message: "Error parsing user data",
+        validatedData: null,
+        user: {},
+      };
     }
   } else {
-    message = "Hash validation failed";
+    return {
+      message: "User data is missing",
+      validatedData: null,
+      user: {},
+    };
   }
 
   return { validatedData, user, message, startParam };

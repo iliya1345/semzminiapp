@@ -6,7 +6,7 @@ import HomeScreen from "@/components/pages/HomeScreen";
 import LoadingScreen from "@/components/LoadingScreen";
 import NavBar from "@/components/navbar";
 import { useUserContext } from "@/context/UserContext";
-import { getCollectionDocIds, getDocumentValue } from "@/utils/firebase";
+import { getCollectionDocIds, getDocumentValue } from "@/utils/supabaseClient";
 
 interface UserData {
   referrals: number;
