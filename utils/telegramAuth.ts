@@ -13,6 +13,7 @@ interface ValidatedData {
   [key: string]: string;
 }
 
+
 interface ValidationResult {
   validatedData: ValidatedData | null;
   user: User;
