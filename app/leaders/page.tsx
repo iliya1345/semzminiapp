@@ -36,8 +36,8 @@ function Leaders() {
             Leaderboard
           </h1>
           <p className="text-muted-foreground">
-            {/* @ts-expect-error */}
-            {userData?.users?.count ? formatNumberWithCommas(userData.users.count) : 0} users
+          {/* @ts-expect-error: Property 'count' might not exist on 'userData?.users' */}
+          {userData?.users?.count ? formatNumberWithCommas(userData.users.count) : 0} users
           </p>
         </div>
 
