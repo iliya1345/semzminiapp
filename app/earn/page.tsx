@@ -8,6 +8,7 @@ import React from "react";
 
 function EarnPage() {
   const { tasks, loading, error } = fetchTasks();
+  
   if (error) {
     return (
       <div className="flex h-screen items-center justify-center">

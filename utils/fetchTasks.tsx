@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useUserContext } from "@/context/UserContext";
-
 import { createSupabaseClient } from "./supaBase";
 
 const supabase = createSupabaseClient();
@@ -22,29 +21,42 @@ export const fetchTasks = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchTasks = async (refetch?: string) => {
-    if (tasks && !refetch) {
+    if (tasks && !refetch && userData && userData.id ) {
       return;
     }
+
+
 
     setLoading(true);
     setError(null);
 
     try {
-      const { data, error } = await supabase
-        .from("tasks")
-        .select("id, title, reward, url, icon, type");
+      // Fetch tasks from the 'tasks' table
+      const { data: tasksData, error: tasksError } = await supabase
+        .from('tasks')
+        .select('*'); // Adjust query to match your table schema
 
-      if (error) {
-        throw new Error(error.message);
+      if (tasksError) {
+        throw tasksError;
       }
 
-      const userTasks: Task[] = data.map((task: any) => ({
+      // Fetch user tasks from the 'user_tasks' table (i.e., tasks already claimed by the user)
+      const { data: userTasksData, error: userTasksError } = await supabase
+        .from('user_tasks')
+        .select('*')
+        .eq('user_id', userData?.id); // Assuming you want to filter by user ID
+
+      if (userTasksError) {
+        throw userTasksError;
+      }
+
+      const userTasks: Task[] = tasksData.map((task: any) => ({
         id: task.id,
         title: task.title,
         reward: task.reward,
         url: task.url,
         icon: task.icon || null,
-        isClaimed: userData?.tasks?.includes(task.id) || false,
+        isClaimed: userTasksData.some((userTask: any) => userTask.task_id === task.id),
         type: task.type || null,
       }));
 
@@ -65,10 +77,10 @@ export const fetchTasks = () => {
     }
   };
 
-  // Automatically fetch tasks when userId changes
+  // Automatically fetch tasks when userData changes
   useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [userData]);
 
   return {
     tasks,

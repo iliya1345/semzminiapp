@@ -128,7 +128,7 @@ export async function POST(req: Request) {
     // Perform the transaction to update user's balance and create the user-task record
     const { error: transactionError } = await supabase
       .from("user_tasks")
-      .insert([{ user_id: userId, task_id: taskId, completed_at: new Date(), reward }]);
+      .insert([{ user_id: userId, task_id: taskId , reward }]);
 
     if (transactionError) {
       return NextResponse.json(
