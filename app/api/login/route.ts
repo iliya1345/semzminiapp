@@ -67,7 +67,7 @@ export async function POST(request: Request) {
         });
 
         // Fetch the user count where id is "0"
-        let { data: userCount, error: fetchError } = await supabase
+        const { data: userCount, error: fetchError } = await supabase
         .from('userCount')
         .select('*')
         .eq('id', "0")
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
           console.error('Error fetching user count:', fetchError);
           } else {
           // Update the count field of the fetched user count
-          let { error: updateError } = await supabase
+          const { error: updateError } = await supabase
             .from('userCount')
             .update({ count: userCount.count })
             .eq('id', "0");
