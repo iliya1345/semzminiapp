@@ -18,7 +18,7 @@ export async function loginWithTelegram(): Promise<string | null> {
       if (typeof window !== "undefined") {
         const initData = WebApp.initData || new URLSearchParams([
           ['user', JSON.stringify({
-            id: 99281932,
+            id: 123321,
             first_name: 'Andrew',
             last_name: 'Rogue',
             username: 'rogue',

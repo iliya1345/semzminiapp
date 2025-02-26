@@ -43,16 +43,7 @@ export async function POST(request: Request) {
 
     if (getUserError || !existingUser) {
       // Create a new user
-      const { data: newUser, error: createUserError } = await supabase.auth.signUp({
-        email: email,
-        password: 'temporary-password', // Handle password properly
-      });
 
-      if (createUserError || !newUser) {
-        return NextResponse.json({ message: "Failed to create user" }, { status: 500 });
-      }
-
-      supabaseUser = newUser.user;
 
       // Save user details in Supabase table
       const { error: saveUserError } = await supabase
