@@ -79,7 +79,7 @@ export async function POST(request: Request) {
           // Update the count field of the fetched user count
           const { error: updateError } = await supabase
             .from('userCount')
-            .update({ count: userCount.count })
+            .update({ count: parseInt(userCount.count) + 1 })
             .eq('id', "0");
 
           if (updateError) {

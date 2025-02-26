@@ -1,3 +1,4 @@
+// @ts-ignore
 "use client";
 import NavBar from "@/components/navbar";
 import { Card, CardContent } from "@/components/ui/card";
