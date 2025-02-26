@@ -1,4 +1,3 @@
-// @ts-ignore
 "use client";
 import NavBar from "@/components/navbar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,7 +36,10 @@ function Leaders() {
             Leaderboard
           </h1>
           <p className="text-muted-foreground">
-            {userData?.users?.count ? formatNumberWithCommas(userData.users.count) : 0} users
+            {
+            //@ts-ignore
+            userData?.users?.count ? formatNumberWithCommas(userData.users.count) : 0
+            } users
           </p>
         </div>
 
