@@ -36,7 +36,7 @@ function Leaders() {
             Leaderboard
           </h1>
           <p className="text-muted-foreground">
-            {formatNumberWithCommas(userData?.users?.count || 0)} users
+            {userData?.users?.count ? formatNumberWithCommas(userData.users.count) : 0} users
           </p>
         </div>
 
