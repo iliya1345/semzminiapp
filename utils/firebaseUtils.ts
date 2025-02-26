@@ -85,6 +85,7 @@ export async function incrementField(
   try {
     const { error } = await supabase
       .from('users')
+      // @ts-expect-error: Property 'count' might not exist on 'userData?.users'
       .update({ [field]: supabase.raw(`${field} + ?`, [amount]) })
       .eq('id', userId);
 
@@ -96,6 +97,6 @@ export async function incrementField(
     console.log(`${field} incremented by ${amount}`);
   } catch (error) {
     console.error('Error incrementing field:', error);
-    throw new Error(`Error incrementing field: ${error.message}`);
+    throw new Error(`Error incrementing field: ${error}`);
   }
 }
