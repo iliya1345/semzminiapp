@@ -73,13 +73,12 @@ const formatRemainingTime = (remainingMinutes: number): string => {
 function SkinPage() {
   const [skins, setSkins] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user, setUser, userData, setUserData } = useUserContext();
+  const { userData, setUserData } = useUserContext();
   const supabase = createSupabaseClient();
 
   const fetchAllSkins = async () => {
     try {
       const data = await getAllRows("booster");
-      console.log(data);
       setSkins(data || []);
     } catch (error) {
       console.error("Error fetching skins:", error);
@@ -87,10 +86,6 @@ function SkinPage() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    console.log("skinnn", userData?.skin);
-  }, [userData]);
 
   useEffect(() => {
     fetchAllSkins();
@@ -157,10 +152,6 @@ function SkinPage() {
     }
   };
 
-  useEffect(() => {
-    console.log(userData);
-  }, [userData]);
-
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -192,15 +183,16 @@ function SkinPage() {
                 <div
                   key={index}
                   className={cn(
-                    "group flex mt-2 items-center justify-between gap-4 rounded-lg bg-zinc-900 p-4 transition-colors"
+                    "group flex-col flex mt-2 items-center justify-between gap-4 rounded-lg bg-zinc-900 p-4 transition-colors"
                   )}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center">
+                  <div className="flex items-center flex-col text-center gap-3">
+                    <div className="flex h-14 w-14 aspect-square items-center justify-center">
                       <img
                         src={skin.image_url}
                         alt="SEMZ"
-                        className="h-14 w-14 rounded-sm"
+                        style={{objectFit:"cover"}}
+                        className="h-14 w-14 rounded-sm aspect-square"
                       />
                     </div>
                     <div className="flex flex-col">
@@ -220,15 +212,15 @@ function SkinPage() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex w-full items-center gap-2">
                     <Button
                       onClick={() => BuyCoin(skin)}
                       variant="secondary"
                       disabled={true}
                       className={
                         userData?.skin?.purchase_id === skin.id
-                          ? "bg-blue-800 text-blue-100 hover:bg-blue-700"
-                          : "bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
+                          ? "bg-blue-800 w-full text-blue-100 hover:bg-blue-700"
+                          : "bg-zinc-800 w-full text-zinc-100 hover:bg-zinc-700"
                       }
                     >
                       {userData?.skin?.purchase_id === skin.id
@@ -246,16 +238,17 @@ function SkinPage() {
               <div
                 key={index}
                 className={cn(
-                  "group flex mt-2 items-center justify-between gap-4 rounded-lg bg-zinc-900 p-4 transition-colors"
+                  "group flex-col flex mt-2 items-center justify-between gap-4 rounded-lg bg-zinc-900 p-4 transition-colors"
                 )}
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center">
-                    <img
-                      src={skin.image_url}
-                      alt="SEMZ"
-                      className="h-14 w-14 rounded-sm"
-                    />
+                <div className="flex items-center flex-col text-center gap-3">
+                  <div className="flex h-14 w-14 aspect-square items-center justify-center">
+                      <img
+                        src={skin.image_url}
+                        alt="SEMZ"
+                        style={{objectFit:"cover"}}
+                        className="h-14 w-14 rounded-sm aspect-square"
+                      />
                   </div>
                   <div className="flex flex-col">
                     <h3 className="text-sm font-medium text-zinc-100">
@@ -266,11 +259,11 @@ function SkinPage() {
                     <p className="text-xs text-zinc-400">{skin.description}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center w-full gap-2">
                   <Button
                     onClick={() => BuyCoin(skin)}
                     variant="secondary"
-                    className="bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
+                    className="bg-zinc-800 w-full text-zinc-100 hover:bg-zinc-700"
                   >
                     buy for {skin.price}
                   </Button>
