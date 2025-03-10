@@ -1,4 +1,5 @@
 "use client"
+
 import NavBar from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { useUserContext } from "@/context/UserContext";
