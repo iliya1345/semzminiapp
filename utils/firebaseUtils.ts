@@ -26,6 +26,29 @@ export async function getAllRows(
   }
 }
 
+export async function getPurchedSkins(
+  docId: string
+) {
+
+  try {
+    const { data, error } = await supabase
+      .from("purchase")
+      .select('*')
+      .eq('user_id', docId)
+      .single()
+
+    if (error) {
+      console.error('Error fetching document:', error);
+      throw new Error(`Unable to fetch document: ${error.message}`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error fetching document:', error);
+    throw new Error(`Unable to fetch document: ${error}`);
+  }
+}
+
 // Fetch data from Supabase
 export async function getDocumentData(
   tableName: string,

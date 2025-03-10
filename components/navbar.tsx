@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, Users, Coins, Wallet, Trophy, ListCheck } from "lucide-react";
+import { Home, Users, Rocket, Trophy, ListCheck } from "lucide-react";
 import Link from "next/link";
 
 const NavBar = ({ page }: { page: string }) => {
@@ -9,8 +9,10 @@ const NavBar = ({ page }: { page: string }) => {
         {[
           { icon: Home, label: "Home", path: "/" },
           { icon: Trophy, label: "Leaders", path: "/leaders" },
+          { icon: Rocket, label: "Booster", path: "/booster" },
           { icon: Users, label: "Frens", path: "/invite" },
           { icon: ListCheck, label: "Earn", path: "/earn" },
+
         ].map(({ icon: Icon, label, path }) => (
           <Link
             href={path}

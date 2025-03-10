@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { loginWithTelegram } from "@/utils/auth";
-import { getAllRows, getDocumentData } from "@/utils/firebaseUtils";
+import { getAllRows, getDocumentData, getPurchedSkins } from "@/utils/firebaseUtils";
 import HomeScreen from "@/components/pages/HomeScreen";
 import LoadingScreen from "@/components/LoadingScreen";
 import NavBar from "@/components/navbar";
@@ -16,6 +16,7 @@ interface UserData {
   username: string;
   tasks: string[] | null;
   users: number | null;
+  skin: any;
 }
 
 export default function Home() {
@@ -25,15 +26,17 @@ export default function Home() {
     userName: string
   ): Promise<Partial<UserData>> => {
     try {
+      
       const usersCount = await getDocumentData("userCount", "0");
       const fetchedTaskIds = await getAllRows("tasks")
-      console.log("fetchedTaskIds", usersCount);
-      console.log("fetchedTaskIds", fetchedTaskIds);
+      const purchedSkins = await getPurchedSkins(userName)
 
       return {
         tasks: fetchedTaskIds.length > 0 ? fetchedTaskIds : null,
         users: usersCount,
+        skin: purchedSkins
       };
+
     } catch (error) {
       console.error("Error fetching additional user data:", error);
       return {};

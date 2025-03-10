@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,7 +7,7 @@ import {
   TrendingUp,
   Clock,
   Wallet,
-  Loader2,
+  Gamepad2,
   Import,
   Trash,
   Users,
@@ -17,19 +16,18 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { formatNumberWithCommas, formatText } from "@/lib/utils";
-import { useUserContext } from "@/context/UserContext";
+import { formatNumberWithCommas } from "@/lib/utils";
 import Link from "next/link";
 import { Address } from "@ton/core";
 import { useTonConnectUI } from "@tonconnect/ui-react";
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { Alert, AlertDescription } from "../ui/alert";
 
 interface HomeScreenProps {
-  firstName: string;
-  lastName: string;
-  userId: number;
-  username: string;
-  balance: number;
+  firstName?: string;
+  lastName?: string;
+  userId?: number;
+  username?: string;
+  balance?: number;
 }
 
 export default function HomeScreen({
@@ -134,7 +132,7 @@ export default function HomeScreen({
 
           <div className="flex items-center  gap-1 mt-4">
             <h1 className="text-5xl font-semibold">
-              {formatNumberWithCommas(balance)}
+              {formatNumberWithCommas(balance ||  0)}
             </h1>
             <h3 className="text-white text-xl text-center">SEMZ</h3>
           </div>
@@ -144,6 +142,16 @@ export default function HomeScreen({
           <h1 className="text-center text-lg">1000 $SEMZ</h1>
         </div> */}
         <div className="gap-3 flex flex-col w-full">
+        
+        <Link href={"/game"} className="w-full">
+            <Button
+              className="rounded-full bg-gradient-to-r w-full from-blue-600 to-blue-700 text-white shadow-lg"
+            >
+              <Gamepad2 className="w-4 h-4 mr-2" />
+              Enter to game
+            </Button>
+        </Link>
+
           <Link href={"/invite"} className="w-full">
             <Button
               size={"lg"}

@@ -26,6 +26,7 @@ interface UserData {
   username: string;
   tasks: string[] | null;
   users: number | null;
+  skin :any;
 }
 
 interface LeaderboardData {
