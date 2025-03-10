@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useEffect, useRef, useState } from 'react';
 import { Timer } from "lucide-react";
 import { useUserContext } from '@/context/UserContext';
@@ -8,15 +8,17 @@ import { createSupabaseClient } from '@/utils/supaBase';
 const FREE_PLAY_LIMIT = 3;
 const RESET_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours in ms
 
-// Helper function to get game data from localStorage
+// Helper function to get game data from localStorage safely
 const getGameData = () => {
+  if (typeof window === 'undefined') {
+    return { lastReset: Date.now(), dailyPlayCount: 0 };
+  }
   const stored = localStorage.getItem("gameData");
   if (stored) {
     try {
       const data = JSON.parse(stored);
-      // Check if 24 hours have passed since lastReset
+      // Reset data if 24 hours have passed
       if (Date.now() - data.lastReset >= RESET_INTERVAL_MS) {
-        // Reset data if older than 24 hours
         const newData = { lastReset: Date.now(), dailyPlayCount: 0 };
         localStorage.setItem("gameData", JSON.stringify(newData));
         return newData;
@@ -34,7 +36,7 @@ const getGameData = () => {
   return newData;
 };
 
-// Helper function to format ms into hh:mm:ss
+// Helper function to format milliseconds into hh:mm:ss
 const formatTime = (ms: number) => {
   const totalSeconds = Math.floor(ms / 1000);
   const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
@@ -47,12 +49,27 @@ const GamePage = () => {
   const { user, setUser, userData, setUserData } = useUserContext();
   const supabase = createSupabaseClient();
 
-  // Local state for game start and daily play count
+  // Initialize gameStarted state and free play count
   const [gameStarted, setGameStarted] = useState(false);
   const [dailyPlayCount, setDailyPlayCount] = useState(0);
   const [freePlaysCountdown, setFreePlaysCountdown] = useState(0);
 
-  // On mount, load daily play data from localStorage
+  // Use a safe default for dimensions and update on mount
+  const [dimensions, setDimensions] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 0,
+    height: typeof window !== 'undefined' ? window.innerHeight : 0,
+  });
+  useEffect(() => {
+    const handleResize = () =>
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // On mount, load daily play data from localStorage (client-only)
   useEffect(() => {
     const data = getGameData();
     setDailyPlayCount(data.dailyPlayCount);
@@ -68,21 +85,6 @@ const GamePage = () => {
       setFreePlaysCountdown(Math.max(0, nextReset - Date.now()));
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
-
-  // Game dimensions state
-  const [dimensions, setDimensions] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
-  useEffect(() => {
-    const handleResize = () =>
-      setDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Refs and state for game elements
@@ -252,6 +254,7 @@ const GamePage = () => {
     justifyContent: 'center',
     alignItems: 'center',
     height: '100vh',
+    background: 'linear-gradient(135deg, #667eea, #764ba2)',
     color: '#fff',
     fontFamily: 'Arial, sans-serif',
     textAlign: 'center',
@@ -281,27 +284,22 @@ const GamePage = () => {
   const startGame = async () => {
     const data = getGameData();
 
-    if(userData && userData.balance){
-      return
-    }
-
     let cost = 0;
     if (data.dailyPlayCount >= FREE_PLAY_LIMIT) {
       cost = (data.dailyPlayCount - (FREE_PLAY_LIMIT - 1)) * 10000;
     }
-    {/* @ts-expect-error: Property 'count' might ndot exist ddon 'userData?.users' */}
+                      {/* @ts-expect-error: Property 'count' might ndddot exist ddon 'userData?.users' */}
     if (cost > 0 && userData?.balance < cost) {
       alert("You don't have enough SEMZ tokens to play again.");
       return;
     }
     if (cost > 0) {
-      {/* @ts-expect-error: Property 'count' migddht not exist ddon 'userData?.users' */}
+                        {/* @ts-expect-error: Property 'count' might not exist ddon 'uddserData?.users' */}
       const updateDataBalance = parseInt(userData.balance) - cost;
-      
       const { error: updateError } = await supabase
         .from("users")
         .update({ balance: updateDataBalance })
-        /* @ts-expect-error: Property 'count' might not exist ddon 'userData?.users' */
+                          /* @ts-expect-error: Property 'count' might not exist ddon 'uddserData?.users' */
         .eq("id", userData.id)
         .single();
       if (updateError) {
