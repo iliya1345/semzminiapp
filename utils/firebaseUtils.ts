@@ -46,10 +46,6 @@ export async function getPurchedSkins(
       .eq('user_id', docId)
       .single()
 
-    if (error) {
-      console.error('Error fetching document:', error);
-      throw new Error(`Unable to fetch document: ${error.message}`);
-    }
     if(data.created_at){
      if(getRemainingMinutes(data.created_at, data?.day) <= 0 ){
       const { error } = await supabase
@@ -57,7 +53,6 @@ export async function getPurchedSkins(
       .delete()
       .eq('user_id', docId)
      }
-     throw new Error(`deleted`);
     }
 
     return data;

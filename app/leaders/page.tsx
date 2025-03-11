@@ -10,6 +10,7 @@ import React from "react";
 function Leaders() {
   const { userData } = useUserContext();
   const { leaderboard, error, loading } = fetchLeaderboard();
+  
   if (error) {
     return (
       <div className="flex h-screen items-center justify-center">
