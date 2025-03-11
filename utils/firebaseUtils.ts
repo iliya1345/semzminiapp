@@ -58,7 +58,7 @@ export async function getPurchedSkins(
     return data;
   } catch (error) {
     console.error('Error fetching document:', error);
-    return {};
+    
   }
 }
 
