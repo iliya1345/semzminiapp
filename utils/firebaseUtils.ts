@@ -26,6 +26,15 @@ export async function getAllRows(
   }
 }
 
+const getRemainingMinutes = (purchaseDate: string, days: number): number => {
+  const purchaseTime = new Date(purchaseDate);
+  const expirationTime = new Date(purchaseTime.getTime() + days * 24 * 60 * 60 * 1000);
+  const now = new Date();
+  const remainingTime = expirationTime.getTime() - now.getTime();
+  const remainingMinutes = Math.floor(remainingTime / 1000 / 60);
+  return remainingMinutes;
+};
+
 export async function getPurchedSkins(
   docId: string
 ) {
@@ -40,6 +49,15 @@ export async function getPurchedSkins(
     if (error) {
       console.error('Error fetching document:', error);
       throw new Error(`Unable to fetch document: ${error.message}`);
+    }
+    if(data.created_at){
+     if(getRemainingMinutes(data.created_at, data?.day) <= 0 ){
+      const { error } = await supabase
+      .from('purchase')
+      .delete()
+      .eq('user_id', docId)
+     }
+     throw new Error(`deleted`);
     }
 
     return data;

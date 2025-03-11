@@ -108,6 +108,7 @@ function SkinPage() {
 
   // Purchase skin function
   const BuyCoin = async (skin: any) => {
+    setLoading(true)
     if (!userData) return;
     if (userData.balance < skin.price) {
       alert("You don't have enough coins to buy this skin");
@@ -150,6 +151,8 @@ function SkinPage() {
     } catch (error) {
       console.error("Error during transaction:", error);
     }
+    setLoading(false)
+
   };
 
   if (loading) {
@@ -214,7 +217,6 @@ function SkinPage() {
                   </div>
                   <div className="flex w-full items-center gap-2">
                     <Button
-                      onClick={() => BuyCoin(skin)}
                       variant="secondary"
                       disabled={true}
                       className={

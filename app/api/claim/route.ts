@@ -116,13 +116,25 @@ export async function POST(req: Request) {
 
     // Referral task handling
     if (type == "Referral") {
-      const refs = user.referrals || 0;
-      if (refs < Number(url)) {
-        return NextResponse.json(
-          { error: "Not enough referrals" },
-          { status: 400 }
-        );
+      if(taskId === "telegram_name"){
+        console.log(validationResult.user.first_name)
+        if ((validationResult.user.first_name?.toLowerCase() != "sems") || (validationResult.user.last_name?.toLowerCase() != "sems")) {
+          return NextResponse.json(
+            { error: "name does not set as SEMS" },
+            { status: 400 }
+          );
+        }else{
+
+        const refs = user.referrals || 0;
+        if (refs < Number(url)) {
+          return NextResponse.json(
+            { error: "Not enough referrals" },
+            { status: 400 }
+          );
+        }
+
       }
+    }
     }
 
     // Perform the transaction to update user's balance and create the user-task record

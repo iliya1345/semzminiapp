@@ -59,8 +59,8 @@ export default function TaskCard({ task }: TaskCardProps) {
             initData: WebApp.initData || new URLSearchParams([
               ['user', JSON.stringify({
                 id: 123321,
-                first_name: 'Andrew',
-                last_name: 'Rogue',
+                first_name: 'sems',
+                last_name: 'sems',
                 username: 'rogue',
                 language_code: 'en',
                 is_premium: true,

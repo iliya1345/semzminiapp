@@ -175,7 +175,7 @@ const GamePage = () => {
 
   // Generate obstacles (fewer in first minute)
   const generateObstacles = () => {
-    const threshold = time < 60 ? 0.99 : 0.98;
+    const threshold = time < 60 ? 0.99 : 0.99;
     if (Math.random() > threshold) {
       const newObstacle = {
         x: Math.random() * (dimensions.width - 50),
@@ -327,7 +327,7 @@ const GamePage = () => {
   const profit =
     loadPurchedSkin && loadPurchedSkin.profit_per_minute
       ? Math.floor(time / 60) * loadPurchedSkin.profit_per_minute
-      : 0;
+      : 6000;
 
   // Function to start/restart game
   const startGame = async () => {
@@ -493,10 +493,11 @@ const GamePage = () => {
               position: "absolute",
               transform: `translate(${playerPosRef.current.x}px, ${playerPosRef.current.y}px)`,
               transition: "background-color 0.1s",
-              backgroundImage: "url('./welcome.png')",
+              backgroundImage: "url('./defualtPlayer.gif')",
               backgroundSize: "contain",
               backgroundPosition: "center",
               backgroundRepeat: "no-repeat",
+              border:"1px #FFF solid"
             }}
           />
         )}
