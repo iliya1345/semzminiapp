@@ -327,7 +327,7 @@ const GamePage = () => {
   const profit =
     loadPurchedSkin && loadPurchedSkin.profit_per_minute
       ? Math.floor(time / 60) * loadPurchedSkin.profit_per_minute
-      : 6000;
+      : Math.floor(time / 60) * 6000;
 
   // Function to start/restart game
   const startGame = async () => {
