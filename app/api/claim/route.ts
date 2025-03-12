@@ -120,7 +120,7 @@ export async function POST(req: Request) {
         if (validationResult.user.first_name != "$SEMZ" && validationResult.user.last_name != "$SEMZ") {
         
           return NextResponse.json(
-            { error: `name does not set as $SEMS ${validationResult.user.first_name}` },
+            { error: `name does not set as $SEMZ, your name: ${validationResult.user.first_name}` },
             { status: 400 }
           );
 
