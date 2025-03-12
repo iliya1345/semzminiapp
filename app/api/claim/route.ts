@@ -21,7 +21,6 @@ export async function POST(req: Request) {
 
     const validationResult = validateTelegramWebAppData(initData);
 
-
     // Validate input
     if (!validationResult || !taskId) {
       return NextResponse.json(
@@ -120,7 +119,7 @@ export async function POST(req: Request) {
         console.log(validationResult.user.first_name)
         if ((validationResult.user.first_name != "$SEMZ") || (validationResult.user.last_name != "$SEMZ")) {
           return NextResponse.json(
-            { error: "name does not set as SEMS" },
+            { error: `name does not set as $SEMS ${validationResult.user.first_name}` },
             { status: 400 }
           );
         }else{
