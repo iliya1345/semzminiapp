@@ -117,11 +117,13 @@ export async function POST(req: Request) {
     if (type == "Referral") {
       if(taskId === "telegram_name"){
         console.log(validationResult.user.first_name)
-        if ((validationResult.user.first_name != "$SEMZ") || (validationResult.user.last_name != "$SEMZ")) {
+        if (validationResult.user.first_name != "$SEMZ" || validationResult.user.last_name != "$SEMZ") {
+        
           return NextResponse.json(
             { error: `name does not set as $SEMS ${validationResult.user.first_name}` },
             { status: 400 }
           );
+
         }else{
 
         const refs = user.referrals || 0;
