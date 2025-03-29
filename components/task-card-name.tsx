@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import WebApp from "@twa-dev/sdk";
 import { Check, Loader2 } from "lucide-react";
 import { useUserContext } from "@/context/UserContext";
 
@@ -25,15 +24,16 @@ export default function TaskCardName({ task }: TaskCardProps) {
   const { setUserData, setTasks } = useUserContext();
   const [isLoading, setIsLoading] = useState(false);
   const [countdown, setCountdown] = useState<number>(0);
+  const [WebApp, setWebApp] = useState<any>(null);
 
   // Helper: Format seconds to hh:mm:ss
   const formatCountdown = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
-    return `${h.toString().padStart(2, "0")}:${m
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s
       .toString()
-      .padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+      .padStart(2, "0")}`;
   };
 
   // Function to start the countdown based on last claim time in localStorage
@@ -57,6 +57,11 @@ export default function TaskCardName({ task }: TaskCardProps) {
   // Check for any existing claim time on mount
   useEffect(() => {
     startCountdown();
+
+    // Dynamically import WebApp only on the client side
+    import("@twa-dev/sdk").then((module) => {
+      setWebApp(module.default);
+    });
 
     // Setup an interval that ticks every second to update the countdown timer.
     const interval = setInterval(() => {
@@ -90,7 +95,28 @@ export default function TaskCardName({ task }: TaskCardProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          initData: WebApp.initData ,
+          initData: typeof window !== "undefined"
+            ? WebApp?.initData
+            : new URLSearchParams([
+                [
+                  "user",
+                  JSON.stringify({
+                    id: 123321,
+                    first_name: "sems",
+                    last_name: "sems",
+                    username: "rogue",
+                    language_code: "en",
+                    is_premium: true,
+                    allows_write_to_pm: true,
+                  }),
+                ],
+                ["hash", "89d6079ad6762351f38c6dbbc41bb53048019256a9443988af7a48bcad16ba31"],
+                ["auth_date", "1716922846"],
+                ["start_param", "debug"],
+                ["chat_type", "sender"],
+                ["chat_instance", "8428209589180549439"],
+                ["signature", "6fbdaab833d39f54518bd5c3eb3f511d035e68cb"],
+              ]).toString(),
           taskId: task.id,
         }),
       });
@@ -122,18 +148,21 @@ export default function TaskCardName({ task }: TaskCardProps) {
           };
         });
 
-        // Save current claim timestamp to localStorage
-
-        WebApp.showAlert(`Claimed ${data.reward} SEMZ successfully!`);
+        // Use the dynamically imported WebApp if available
+        if (WebApp) {
+          WebApp.showAlert(`Claimed ${data.reward} SEMZ successfully!`);
+        }
 
         // Start the countdown timer after claim
-        setTimeout(()=>{
+        setTimeout(() => {
           startCountdown();
-        },3000)
+        }, 3000);
       }
     } catch (error: any) {
       console.error("Error claiming task:", error);
-      WebApp.showAlert(error.message || "Failed to claim rewards");
+      if (WebApp) {
+        WebApp.showAlert(error.message || "Failed to claim rewards");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -179,9 +208,14 @@ export default function TaskCardName({ task }: TaskCardProps) {
           {isLoading ? (
             <Loader2 className="animate-spin" />
           ) : status === "countdown" ? (
-            formatCountdown(countdown) == "00:00:00"? <Check className="animate-pulse" /> : formatCountdown(countdown)
-          ) : "Claim" 
-          }
+            formatCountdown(countdown) === "00:00:00" ? (
+              <Check className="animate-pulse" />
+            ) : (
+              formatCountdown(countdown)
+            )
+          ) : (
+            "Claim"
+          )}
         </Button>
       </div>
     </div>

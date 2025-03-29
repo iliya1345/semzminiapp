@@ -39,7 +39,6 @@ export const fetchTasks = () => {
         throw tasksError;
       }
 
-      if(!userData?.id) { return }
       // Fetch user tasks from the 'user_tasks' table (i.e., tasks already claimed by the user)
       const { data: userTasksData, error: userTasksError } = await supabase
         .from('user_tasks')
