@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -89,23 +90,7 @@ export default function TaskCardName({ task }: TaskCardProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          initData: WebApp.initData || new URLSearchParams([
-            ['user', JSON.stringify({
-              id: 123321,
-              first_name: '$SEMZ',
-              last_name: '$SEMZ',
-              username: 'rogue',
-              language_code: 'en',
-              is_premium: true,
-              allows_write_to_pm: true,
-            })],
-            ['hash', '89d6079ad6762351f38c6dbbc41bb53048019256a9443988af7a48bcad16ba31'],
-            ['auth_date', '1716922846'],
-            ['start_param', 'debug'],
-            ['chat_type', 'sender'],
-            ['chat_instance', '8428209589180549439'],
-            ['signature', '6fbdaab833d39f54518bd5c3eb3f511d035e68cb'],
-          ]).toString(),
+          initData: WebApp.initData ,
           taskId: task.id,
         }),
       });

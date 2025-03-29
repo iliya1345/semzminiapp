@@ -4,7 +4,7 @@ import TaskCard from "@/components/task-card";
 import TaskCardName from "@/components/task-card-name";
 import { Card, CardContent } from "@/components/ui/card";
 import { fetchTasks } from "@/utils/fetchTasks";
-import { ListCheck, Loader2, Users2 } from "lucide-react";
+import { ListCheck, Loader2 } from "lucide-react";
 import React from "react";
 
 function EarnPage() {

@@ -26,8 +26,6 @@ export const fetchTasks = () => {
       return;
     }
 
-
-
     setLoading(true);
     setError(null);
 
@@ -41,6 +39,7 @@ export const fetchTasks = () => {
         throw tasksError;
       }
 
+      if(!userData?.id) { return }
       // Fetch user tasks from the 'user_tasks' table (i.e., tasks already claimed by the user)
       const { data: userTasksData, error: userTasksError } = await supabase
         .from('user_tasks')
@@ -59,7 +58,6 @@ export const fetchTasks = () => {
         icon: task.icon || null,
         isClaimed: userTasksData.some((userTask: any) => userTask.task_id === task.id),
         type: task.type || null,
-        date: userTasksData.find((userTask: any) => userTask.task_id === task.id)
       }));
 
       setTasks(userTasks);
