@@ -13,6 +13,7 @@ interface Task {
   icon?: string;
   isClaimed: boolean;
   type: string | null;
+  date? :string;
 }
 
 export const fetchTasks = () => {
@@ -58,6 +59,7 @@ export const fetchTasks = () => {
         icon: task.icon || null,
         isClaimed: userTasksData.some((userTask: any) => userTask.task_id === task.id),
         type: task.type || null,
+        date: userTasksData.find((userTask: any) => userTask.task_id === task.id)
       }));
 
       setTasks(userTasks);

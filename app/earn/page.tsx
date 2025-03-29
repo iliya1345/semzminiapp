@@ -1,6 +1,7 @@
 "use client";
 import NavBar from "@/components/navbar";
 import TaskCard from "@/components/task-card";
+import TaskCardName from "@/components/task-card-name";
 import { Card, CardContent } from "@/components/ui/card";
 import { fetchTasks } from "@/utils/fetchTasks";
 import { ListCheck, Loader2, Users2 } from "lucide-react";
@@ -36,7 +37,10 @@ function EarnPage() {
       <Card className="bg-card/50">
         <CardContent className="p-6">
           <div className="space-y-4">
-            {tasks?.map((task) => (
+            {tasks?.filter((value)=> value.id === "telegram_name").map((task) => (
+              <TaskCardName key={task.id} task={task} />
+            ))}
+            {tasks?.filter((value)=> value.id !== "telegram_name").map((task) => (
               <TaskCard key={task.id} task={task} />
             ))}
           </div>

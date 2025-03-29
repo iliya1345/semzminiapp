@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     // Handle errors
     if (userError) return NextResponse.json({ error: "User not found" }, { status: 404 });
     if (taskError) return NextResponse.json({ error: "Task not found" }, { status: 404 });
-    if (userTask) return NextResponse.json({ error: "Task already claimed" }, { status: 400 });
+    if (userTask && userTask.task_id !== "telegram_name") return NextResponse.json({ error: "Task already claimed" }, { status: 400 });
 
     const taskData = task as TaskData;
     const { type, url, reward } = taskData;
