@@ -60,7 +60,7 @@ export function validateTelegramWebAppData(
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const timeDifference = currentTimestamp - authTimestamp;
   const fiveMinutesInSeconds = 5 * 60;
-  {/* 
+  
   if (timeDifference > fiveMinutesInSeconds) {
     return {
       message: "Telegram data is older than 5 minutes",
@@ -69,7 +69,7 @@ export function validateTelegramWebAppData(
     };
   }
 
-  */}
+  
 
   const dataCheckString = Array.from(initData.entries())
     .sort(([a], [b]) => a.localeCompare(b))
@@ -85,8 +85,8 @@ export function validateTelegramWebAppData(
     .createHmac("sha256", secretKey)
     .update(dataCheckString)
     .digest("hex");
-    //calculatedHash === hash
-    if (true) {
+
+    if (calculatedHash === hash) {
     validatedData = Object.fromEntries(initData.entries());
     message = "Validation successful";
 
