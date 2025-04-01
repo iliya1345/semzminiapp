@@ -10,7 +10,7 @@ const NavBar = ({ page }: { page: string }) => {
           { icon: Home, label: "Home", path: "/" },
           { icon: Trophy, label: "Leaders", path: "/leaders" },
           { icon: Rocket, label: "Booster", path: "/booster" },
-          { icon: Users, label: "Frens", path: "/invite" },
+          { icon: Users, label: "Friends", path: "/invite" },
           { icon: ListCheck, label: "Earn", path: "/earn" },
 
         ].map(({ icon: Icon, label, path }) => (

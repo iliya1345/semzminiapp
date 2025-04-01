@@ -18,6 +18,8 @@ interface UserData {
   users: number | null;
   skin: any;
   tonEarnDate:any;
+  tonFree:any;
+
 }
 
 export default function Home() {

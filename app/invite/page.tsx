@@ -5,9 +5,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useUserContext } from "@/context/UserContext";
 import { formatText } from "@/lib/utils";
 import WebApp from "@twa-dev/sdk";
-import { Wallet, Users, Copy, Check, Share2 } from "lucide-react";
+import { Check, Copy, Share2, Users, Wallet } from "lucide-react";
 import Image from "next/image";
-import React, { useState } from "react";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
 
 function ReferralPage() {
   const { userData } = useUserContext();
@@ -30,6 +31,43 @@ function ReferralPage() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+    const [timeLeft, setTimeLeft] = useState({
+      months: 0,
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+    });
+  
+    useEffect(() => {
+      if (userData?.tonEarnDate?.value) {
+        const targetDate = new Date(userData.tonEarnDate.value);
+        
+        const updateCountdown = () => {
+          const now = new Date();
+          // @ts-expect-error: Property 'count' might fdsfdnot exist on userData?.users
+          const diff = targetDate - now;
+  
+          if (diff <= 0) {
+            setTimeLeft({ months: 0, days: 0, hours: 0, minutes: 0, seconds: 0 });
+            return;
+          }
+  
+          const months = Math.floor(diff / (1000 * 60 * 60 * 24 * 30));
+          const days = Math.floor((diff % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  
+          setTimeLeft({ months, days, hours, minutes, seconds });
+        };
+  
+        const intervalId = setInterval(updateCountdown, 1000);
+  
+        return () => clearInterval(intervalId); // Clean up on component unmount
+      }
+    }, [userData]);
 
   return (
     <div>
@@ -96,10 +134,24 @@ function ReferralPage() {
           <Share2 className="w-4 h-4 mr-2" />
           Invite a Friend
         </Button>
+
+        <Link href={"/ton-earn"}>
+        <Card className="bg-card/50 mb-2">
+          <CardContent className="p-6 flex-col flex justify-center items-center">
+            <Image width={90} height={90} src={"/ton_image.webp"} alt={"ton"} />
+            <h1 className="text-xl font-bold tracking-tight mb-2">TON FREE</h1>
+            <p className="text-sm text-muted-foreground">Time left to earn more TON:</p>
+            <div className="text-sm text-center mt-1 font-semibold">
+              {timeLeft.months} months {timeLeft.days} days {timeLeft.hours} hours {timeLeft.minutes} minutes {timeLeft.seconds} seconds
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
       </div>
+      {/* Countdown Timer */}
 
       {/* Nav Bar */}
-      <NavBar page="Frens" />
+      <NavBar page="Friends" />
     </div>
   );
 }
