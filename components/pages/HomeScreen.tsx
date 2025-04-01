@@ -140,6 +140,7 @@ export default function HomeScreen({
           </div>
 
           <div className="flex items-center  gap-1 mt-4">
+            <img className="scale-up" src="/ton_image.webp" alt="" style={{width:"30px",height:"30px"}}/>
             <h1 className="text-xl font-semibold">
               {formatNumberWithCommas(tonFree ||  0)}
             </h1>
