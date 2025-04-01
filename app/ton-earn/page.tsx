@@ -11,7 +11,6 @@ import { useActiveTime } from "../ActiveTimeContext";
 const supabase = createSupabaseClient();
 const TEN_MINUTES_IN_SECONDS = 600;
 const COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
-supabase.auth.signInAnonymously()
 
 function TonEarnPage() {
   const { userData, setUserData } = useUserContext();

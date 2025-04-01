@@ -48,7 +48,6 @@ const GamePage = () => {
   const { user, setUser, userData, setUserData } = useUserContext();
   const supabase = createSupabaseClient();
   const router = useRouter();
-  supabase.auth.signInAnonymously()
 
   // State for purchased skin from DB
   const [loadPurchedSkin, setPurchasedSkin] = useState<any | null>(null);
