@@ -27,7 +27,7 @@ function EarnPage() {
       
       const updateCountdown = () => {
         const now = new Date();
-        //@ts-ignore
+        // @ts-expect-error: Property 'count' might fdsfdnot exist on userData?.users
         const diff = targetDate - now;
 
         if (diff <= 0) {
