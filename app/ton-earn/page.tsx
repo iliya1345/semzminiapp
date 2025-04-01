@@ -128,7 +128,7 @@ function TonEarnPage() {
           <div className="text-sm text-center mt-1 font-semibold">
             {timeLeft.months} months {timeLeft.days} days {timeLeft.hours} hours {timeLeft.minutes} minutes {timeLeft.seconds} seconds
           </div>
-          <p className="text-sm text-center my-1 font-semibold">{userData && userData.referrals * 0.005}</p>
+          <p className="text-sm text-center my-1 font-semibold">Ton Per day : {userData && userData.referrals * 0.005}</p>
           <Button
             onClick={AddScore}
             className="rounded-full mb-4 mt-4 bg-gradient-to-r w-full from-blue-600 to-blue-700 text-white shadow-lg"
