@@ -15,6 +15,8 @@ interface Task {
   isClaimed: boolean;
   icon?: string;
   type: string | null;
+  hasAnimation:boolean;
+
 }
 
 interface UserData {

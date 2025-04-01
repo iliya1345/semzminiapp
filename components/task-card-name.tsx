@@ -14,6 +14,7 @@ interface TaskCardProps {
     icon?: string;
     isClaimed: boolean;
     type: string | null;
+    hasAnimation : boolean;
   };
 }
 

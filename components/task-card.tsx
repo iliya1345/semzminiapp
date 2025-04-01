@@ -13,6 +13,7 @@ interface TaskCardProps {
     url: string;
     icon?: string;
     isClaimed: boolean;
+    hasAnimation:boolean;
     type: string | null;
   };
 }

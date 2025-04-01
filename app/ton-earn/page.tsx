@@ -6,7 +6,6 @@ import Image from "next/image";
 import { useUserContext } from "@/context/UserContext";
 import { createSupabaseClient } from "@/utils/supaBase";
 import { Button } from "@/components/ui/button";
-import WebApp from "@twa-dev/sdk";
 import { useActiveTime } from "../ActiveTimeContext";
 
 const supabase = createSupabaseClient();
@@ -115,7 +114,7 @@ function TonEarnPage() {
         localStorage.setItem("lastScoreClaim", new Date().toISOString());
       }
     } else {
-      WebApp.showAlert("There are no referrals");
+      alert("There are no referrals");
     }
   };
 
