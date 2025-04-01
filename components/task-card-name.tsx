@@ -190,7 +190,7 @@ export default function TaskCardName({ task }: TaskCardProps) {
             height={50}
             width={50}
             alt="SEMZ"
-            className="h-8 w-8 rounded-sm"
+            className={task.hasAnimation ? "h-8 w-8 rounded-sm scale-up" : "h-8 w-8 rounded-sm"}
           />
         </div>
         <div className="flex flex-col">

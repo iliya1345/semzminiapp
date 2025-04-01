@@ -17,6 +17,7 @@ interface UserData {
   tasks: string[] | null;
   users: number | null;
   skin: any;
+  tonEarnDate:any;
 }
 
 export default function Home() {
@@ -30,11 +31,13 @@ export default function Home() {
       const usersCount = await getDocumentData("userCount", "0");
       const fetchedTaskIds = await getAllRows("tasks")
       const purchedSkins = await getPurchedSkins(userName)
+      const tonEarnDate = await getDocumentData("app_data", "1");
 
       return {
         tasks: fetchedTaskIds.length > 0 ? fetchedTaskIds : null,
         users: usersCount,
-        skin: purchedSkins
+        skin: purchedSkins,
+        tonEarnDate: tonEarnDate
       };
 
     } catch (error) {

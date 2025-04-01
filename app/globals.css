@@ -89,3 +89,19 @@ body {
     scrollbar-width: none; /* Firefox */
   }
 }
+
+
+.scale-up {
+  animation: scaleUp 1s ease-in-out infinite alternate;
+}
+
+@keyframes scaleUp {
+  from {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

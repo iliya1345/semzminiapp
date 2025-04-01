@@ -14,6 +14,7 @@ interface Task {
   isClaimed: boolean;
   type: string | null;
   date? :string;
+  hasAnimation:boolean;
 }
 
 export const fetchTasks = () => {
@@ -57,6 +58,7 @@ export const fetchTasks = () => {
         icon: task.icon || null,
         isClaimed: userTasksData.some((userTask: any) => userTask.task_id === task.id),
         type: task.type || null,
+        hasAnimation:task.hasAnimation
       }));
 
       setTasks(userTasks);

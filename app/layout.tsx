@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import UserContextProvider from "./UserContextProvider";
+import { ActiveTimeProvider } from "./ActiveTimeContext"; // adjust path as needed
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -21,9 +22,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -34,7 +33,9 @@ export default function RootLayout({
           MozUserSelect: "none",
         }}
       >
-        <UserContextProvider>{children}</UserContextProvider>
+        <UserContextProvider>
+          <ActiveTimeProvider>{children}</ActiveTimeProvider>
+        </UserContextProvider>
       </body>
     </html>
   );
