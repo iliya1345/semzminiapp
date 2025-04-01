@@ -4,6 +4,7 @@ import { useUserContext } from "@/context/UserContext";
 import { createSupabaseClient } from "./supaBase";
 
 const supabase = createSupabaseClient();
+supabase.auth.signInAnonymously()
 
 interface Task {
   id: string;

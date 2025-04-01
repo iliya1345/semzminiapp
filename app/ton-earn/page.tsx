@@ -11,9 +11,10 @@ import { useActiveTime } from "../ActiveTimeContext";
 const supabase = createSupabaseClient();
 const TEN_MINUTES_IN_SECONDS = 600;
 const COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
+supabase.auth.signInAnonymously()
 
 function TonEarnPage() {
-  const { userData } = useUserContext();
+  const { userData, setUserData } = useUserContext();
   const { activeTime } = useActiveTime(); // global active time in seconds
   
   const [timeLeft, setTimeLeft] = useState({
@@ -110,6 +111,8 @@ function TonEarnPage() {
         })
         .eq("id", userData?.id);
 
+        setUserData((prev) => prev ? { ...prev, tonFree: userData.tonFree + userData.referrals * 0.005 } : prev);
+
       if (!updateReferrerError) {
         localStorage.setItem("lastScoreClaim", new Date().toISOString());
       }
@@ -118,6 +121,8 @@ function TonEarnPage() {
     }
   };
 
+
+    
   return (
     <div className="flex flex-col w-full h-screen p-4 overflow-y-scroll pb-24">
       <Card className="bg-card/50 mb-2">

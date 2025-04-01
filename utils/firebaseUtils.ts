@@ -3,6 +3,7 @@
 
 import { createSupabaseClient } from "./supaBase";
 const supabase = createSupabaseClient();
+supabase.auth.signInAnonymously()
 
 export async function getAllRows(
   tableName: string,

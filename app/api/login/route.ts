@@ -24,6 +24,7 @@ export async function POST(request: Request) {
     // Initialize Supabase client
     const supabase = createSupabaseClient();
 
+    supabase.auth.signInAnonymously()
     // Custom claims for Supabase (Supabase doesn't support custom claims in the same way as Firebase)
     const customClaims = {
       telegramId: telegramId,

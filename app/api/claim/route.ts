@@ -14,6 +14,7 @@ interface TaskData {
 export async function POST(req: Request) {
 
   const supabase = createSupabaseClient();
+  supabase.auth.signInAnonymously()
 
   try {
     // Parse request body

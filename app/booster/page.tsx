@@ -74,6 +74,7 @@ function SkinPage() {
   const [loading, setLoading] = useState(true);
   const { userData, setUserData } = useUserContext();
   const supabase = createSupabaseClient();
+  supabase.auth.signInAnonymously()
 
   const fetchAllSkins = async () => {
     try {
