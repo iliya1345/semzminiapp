@@ -93,6 +93,7 @@ export default function Home() {
             lastName={userData.lastName || ""}
             username={userData.username || ""}
             balance={userData.balance}
+            tonFree={userData.tonFree}
           />
           <NavBar page="Home" />
         </>

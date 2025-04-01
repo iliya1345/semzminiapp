@@ -28,6 +28,7 @@ interface HomeScreenProps {
   userId?: number;
   username?: string;
   balance?: number;
+  tonFree:any
 }
 
 export default function HomeScreen({
@@ -36,6 +37,7 @@ export default function HomeScreen({
   userId,
   username,
   balance,
+  tonFree
 }: HomeScreenProps) {
   const [tonConnectUI] = useTonConnectUI();
   const [tonWalletAddress, setTonWalletAddress] = useState(null);
@@ -136,6 +138,14 @@ export default function HomeScreen({
             </h1>
             <h3 className="text-white text-xl text-center">SEMZ</h3>
           </div>
+
+          <div className="flex items-center  gap-1 mt-4">
+            <h1 className="text-xl font-semibold">
+              {formatNumberWithCommas(tonFree ||  0)}
+            </h1>
+            <h3 className="text-white text-xl text-center">TON</h3>
+          </div>
+
         </div>
         {/* <div className="border rounded-md flex items-center p-4 mb-2 gap-2 bg-black/20">
           <Wallet />
