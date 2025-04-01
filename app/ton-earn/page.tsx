@@ -143,7 +143,7 @@ function TonEarnPage() {
             <br />
             For example, if someone has <strong>1,000 referrals</strong>, they will earn <strong>5 TON daily</strong>.
             <br />
-            ✅ <strong>Only active users</strong> are counted—each referred user must spend at least <strong>30 minutes daily</strong> in the bot to be considered valid.
+            ✅ <strong>Only active users</strong> are counted—each referred user must spend at least <strong>10 minutes daily</strong> in the bot to be considered valid.
             <br />
             ⚠️ <strong>Fake users will not be counted!</strong> <br />
             Only the <strong>active referrals</strong> you have added will be included.
