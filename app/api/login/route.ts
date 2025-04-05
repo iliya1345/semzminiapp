@@ -1,8 +1,47 @@
 import { NextResponse } from "next/server";
 import { validateTelegramWebAppData } from "@/utils/telegramAuth";
-import { createSupabaseClient } from "@/utils/supaBase";
+import { createSupabaseAdmin } from "../supaBaseAdmin";
+
+
+
+async function checkOrCreateUser(email:string, password:string) {
+  const supabase = createSupabaseAdmin();
+
+  // List users to find a match. (In a production scenario, consider more efficient methods.)
+  const { data: users, error: listError } = await supabase.auth.admin.listUsers();
+  if (listError) {
+    console.error('Error listing users:', listError);
+    return null;
+  }
+  
+  // Check if a user with the given email exists.
+  const existingUser = users.find((user:any) => user.email === email);
+  
+  if (existingUser) {
+    console.log('User exists:', existingUser);
+    return existingUser;
+  }
+  
+    // Create a new user if not found.
+    const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,  // Set to true if you want to bypass email confirmation.
+    });
+    
+    if (createError) {
+      console.error('Error creating user:', createError);
+      return null;
+    }
+    
+    console.log('New user created:', newUser);
+    return newUser;
+  
+}
 
 export async function POST(request: Request) {
+  const supabase = createSupabaseAdmin();
+
   try {
     const { initData } = await request.json();
 
@@ -21,8 +60,9 @@ export async function POST(request: Request) {
     const email = `telegram${telegramId}@telegram.com`;
     console.log("Referer ID", startParam);
 
+    //await checkOrCreateUser(email,telegramId)
+
     // Initialize Supabase client
-    const supabase = createSupabaseClient();
 
     // Custom claims for Supabase (Supabase doesn't support custom claims in the same way as Firebase)
     const customClaims = {
@@ -42,8 +82,7 @@ export async function POST(request: Request) {
     
 
     if (getUserError || !existingUser) {
-      // Create a new user
-
+      
 
       // Save user details in Supabase table
       const { error: saveUserError } = await supabase
@@ -56,7 +95,6 @@ export async function POST(request: Request) {
           balance: 10000,
           referrals: 0,
         });
-
         // Fetch the user count where id is "0"
         const { data: userCount, error: fetchError } = await supabase
         .from('userCount')

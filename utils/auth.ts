@@ -1,19 +1,76 @@
 "use client";
 import WebApp from "@twa-dev/sdk";
-
-
+import { createSupabaseClient } from "./supaBase";
 
 /**
  * Logs in a user with Telegram and returns their display name.
  *
  * @returns The display name of the authenticated user.
  */
+
+async function loginOrSignup(email: string, password: string) {
+  const supabase = createSupabaseClient();
+
+  try {
+    // Attempt to sign in the user
+    const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (loginData?.user) {
+      console.log('User logged in:', loginData.user);
+      return {
+        success: true,
+        message: 'User logged in successfully',
+        user: loginData.user,
+      };
+    }
+
+    // If login fails, delay before attempting signup to help prevent too many requests
+    if (loginError) {
+      // Delay signup by 2 seconds (adjust as necessary)
+
+      const { data: signupData, error: signupError } = await supabase.auth.signUp({ email, password });
+
+      if (signupError) {
+        console.error('Signup error:', signupError.message);
+        return {
+          success: false,
+          message: signupError.message,
+        };
+      }
+
+      console.log('User signed up:', signupData.user);
+      return {
+        success: true,
+        message: 'User signed up successfully',
+        user: signupData.user,
+      };
+    } else {
+      console.error('Login error:', loginError);
+      return {
+        success: false,
+        message: loginError || 'An error occurred during login',
+      };
+    }
+  } catch (err) {
+    console.error('Unexpected error:', err);
+    return {
+      success: false,
+      message: 'An unexpected error occurred',
+    };
+  }
+}
+
+
 export async function loginWithTelegram(): Promise<string | null> {
+
+  
+  
   return new Promise(async (resolve, reject) => {
     // Detect Android devices
 
     // If it's an Android device or user is not authenticated, log in again
     try {
+      
       console.log("Attempting to sign in...");
       if (typeof window !== "undefined") {
         const initData = WebApp.initData || new URLSearchParams([
@@ -56,7 +113,13 @@ export async function loginWithTelegram(): Promise<string | null> {
         const currentUser = token;
 
         if (currentUser) {
-          console.log("Successfully logged in!");
+          const email = `telegram${currentUser}@telegram.com`;
+          const password = String(currentUser);
+  
+          const resualt = await loginOrSignup(email, password)
+          if(!resualt.success){
+            return
+          }
           resolve(currentUser); // Return displayName if available
         } else {
           reject("No user information available after sign-in.");
@@ -70,3 +133,6 @@ export async function loginWithTelegram(): Promise<string | null> {
     }
   });
 }
+
+
+

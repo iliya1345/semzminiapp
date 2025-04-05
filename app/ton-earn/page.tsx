@@ -1,21 +1,26 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { BackButton } from "@twa-dev/sdk/react";
+import dynamic from "next/dynamic";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { useUserContext } from "@/context/UserContext";
-import { createSupabaseClient } from "@/utils/supaBase";
 import { Button } from "@/components/ui/button";
 import { useActiveTime } from "../ActiveTimeContext";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
-const supabase = createSupabaseClient();
 const TEN_MINUTES_IN_SECONDS = 600;
 const COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
 
+// Dynamically import BackButton to ensure it's only rendered on the client
+const BackButton = dynamic(
+  () => import("@twa-dev/sdk/react").then((mod) => mod.BackButton),
+  { ssr: false }
+);
+
 function TonEarnPage() {
   const { userData, setUserData } = useUserContext();
-  const { activeTime } = useActiveTime(); // global active time in seconds
-  
+  const { activeTime } = useActiveTime(); // Global active time in seconds
+
   const [timeLeft, setTimeLeft] = useState({
     months: 0,
     days: 0,
@@ -23,11 +28,10 @@ function TonEarnPage() {
     minutes: 0,
     seconds: 0,
   });
+  const [cooldownTime, setCooldownTime] = useState(0);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const [cooldownTime, setCooldownTime] = useState<number>(0);
-  const [errorMessage, setErrorMessage] = useState<string>("");
-
-  // Countdown for TON claim availability (if using userData.tonEarnDate)
+  // Countdown for TON claim availability (based on userData.tonEarnDate)
   useEffect(() => {
     if (userData?.tonEarnDate?.value) {
       const targetDate = new Date(userData.tonEarnDate.value);
@@ -72,7 +76,7 @@ function TonEarnPage() {
     return () => clearInterval(cooldownInterval);
   }, []);
 
-  const formatTime = (milliseconds: number) => {
+  const formatTime = (milliseconds:any) => {
     const totalSeconds = Math.floor(milliseconds / 1000);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -102,26 +106,35 @@ function TonEarnPage() {
 
     setErrorMessage(""); // Clear error message
 
-    if (userData?.referrals) {
-      const { error: updateReferrerError } = await supabase
-        .from("users")
-        .update({
-          tonFree: userData.tonFree + userData.referrals * 0.005,
-        })
-        .eq("id", userData?.id);
+    // Call backend API to process TON claim
+    if (userData?.id) {
+      try {
+        const response = await fetchWithAuth("/api/claimTon", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: userData.id }),
+        });
+        const result = await response.json();
 
-        setUserData((prev) => prev ? { ...prev, tonFree: userData.tonFree + userData.referrals * 0.005 } : prev);
+        if (!response.ok) {
+          setErrorMessage(result.error || "Error claiming TON.");
+          return;
+        }
 
-      if (!updateReferrerError) {
+        // Update userData with the new TON free balance
+        setUserData((prev) =>
+          prev ? { ...prev, tonFree: result.newTonFree } : prev
+        );
+
+        // Set the cooldown by storing the current timestamp in localStorage
         localStorage.setItem("lastScoreClaim", new Date().toISOString());
+        alert("TON claimed successfully!");
+      } catch (error:any) {
+          setErrorMessage(error?.message);
       }
-    } else {
-      alert("There are no referrals");
     }
   };
 
-
-    
   return (
     <div className="flex flex-col w-full h-screen p-4 overflow-y-scroll pb-24">
       <Card className="bg-card/50 mb-2">
@@ -130,32 +143,41 @@ function TonEarnPage() {
           <h1 className="text-xl font-bold tracking-tight mb-2">TON FREE</h1>
           <p className="text-sm text-muted-foreground">Time left to earn more TON:</p>
           <div className="text-sm text-center mt-1 font-semibold">
-            {timeLeft.months} months {timeLeft.days} days {timeLeft.hours} hours {timeLeft.minutes} minutes {timeLeft.seconds} seconds
+            {timeLeft.months} months {timeLeft.days} days {timeLeft.hours} hours{" "}
+            {timeLeft.minutes} minutes {timeLeft.seconds} seconds
           </div>
-          <p className="text-sm text-center my-1 font-semibold">Ton Per day : {userData && userData.referrals * 0.005}</p>
+          <p className="text-sm text-center my-1 font-semibold">
+            Ton Per day : {userData && userData.referrals * 0.005}
+          </p>
+          {errorMessage && <p className="text-red-500">{errorMessage}</p>}
           <Button
             onClick={AddScore}
             className="rounded-full mb-4 mt-4 bg-gradient-to-r w-full from-blue-600 to-blue-700 text-white shadow-lg"
           >
             Claim TON
           </Button>
-
-          <p>Active time: {Math.floor(activeTime / 60)} minutes {activeTime % 60} seconds</p>
-          {cooldownTime > 0 && <p>Next claim available in: {formatTime(cooldownTime)}</p>}
-
+          <p>
+            Active time: {Math.floor(activeTime / 60)} minutes {activeTime % 60} seconds
+          </p>
+          {cooldownTime > 0 && (
+            <p>Next claim available in: {formatTime(cooldownTime)}</p>
+          )}
           <p className="text-center text-muted-foreground mt-4">
             You will receive <strong>0.005 TON</strong> for each referral.
             <br />
-            For example, if someone has <strong>1,000 referrals</strong>, they will earn <strong>5 TON daily</strong>.
+            For example, if someone has <strong>1,000 referrals</strong>, they will earn{" "}
+            <strong>5 TON daily</strong>.
             <br />
-            ✅ <strong>Only active users</strong> are counted—each referred user must spend at least <strong>10 minutes daily</strong> in the bot to be considered valid.
+            ✅ <strong>Only active users</strong> are counted—each referred user must spend at least{" "}
+            <strong>10 minutes daily</strong> in the bot to be considered valid.
             <br />
-            ⚠️ <strong>Fake users will not be counted!</strong> <br />
+            ⚠️ <strong>Fake users will not be counted!</strong>
+            <br />
             Only the <strong>active referrals</strong> you have added will be included.
           </p>
         </CardContent>
       </Card>
-      {typeof window !== "undefined" && <BackButton />}
+      <BackButton />
     </div>
   );
 }

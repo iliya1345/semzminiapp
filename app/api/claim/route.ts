@@ -1,7 +1,7 @@
 import { validateHash } from "@/utils/validateHash";
 import { NextResponse } from "next/server";
-import { createSupabaseClient } from "@/utils/supaBase";
 import { validateTelegramWebAppData } from "@/utils/telegramAuth";
+import { createSupabaseAdmin } from "../supaBaseAdmin";
 
 
 // Define interface for task data
@@ -13,7 +13,7 @@ interface TaskData {
 
 export async function POST(req: Request) {
 
-  const supabase = createSupabaseClient();
+  const supabase = createSupabaseAdmin();
 
   try {
     // Parse request body

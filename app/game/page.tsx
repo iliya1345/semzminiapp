@@ -2,8 +2,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Timer } from "lucide-react";
 import { useUserContext } from "@/context/UserContext";
-import { createSupabaseClient } from "@/utils/supaBase";
 import { useRouter } from "next/navigation";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 const FREE_PLAY_LIMIT = 3;
 const RESET_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -46,7 +46,6 @@ const formatTime = (ms: number) => {
 
 const GamePage = () => {
   const { user, setUser, userData, setUserData } = useUserContext();
-  const supabase = createSupabaseClient();
   const router = useRouter();
 
   // State for purchased skin from DB
@@ -54,18 +53,31 @@ const GamePage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: booster, error } = await supabase
-        .from("booster")
-        .select("*")
-        .eq("id", userData?.skin?.purchase_id)
-        .single();
-      if (error) {
-        console.error("Error loading data:", error);
-        return;
+      try {
+        const response = await fetchWithAuth("/api/getBooster", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: user.userId, // Make sure `user.userId` exists
+            purchaseId: userData?.skin?.purchase_id, // Make sure `userData?.skin?.purchase_id` exists
+          }),
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          setPurchasedSkin(data);
+        } else {
+          console.error("Error loading booster data:", data.error);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
-      setPurchasedSkin(booster);
     };
-    fetchData();
+
+      fetchData();
   }, []);
 
   // Game state
@@ -76,10 +88,10 @@ const GamePage = () => {
   const [coinCount, setCoinCount] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   // Start with low speed for the first minute.
-  useEffect(()=>{
+  useEffect(() => {
     const updateBalanceUserData = async () => {
-      if(gameOver){
-
+      if (gameOver && user?.userId) {
+        // Optimistically update UI before calling the backend
         setUserData((prevUserData) => {
           if (!prevUserData) return prevUserData;
           return {
@@ -87,17 +99,35 @@ const GamePage = () => {
             balance: prevUserData.balance + coinCount + profit,
           };
         });
-
-        const { error: updateError } = await supabase
-          .from("users")
-                // @ts-expect-error: Property 'count' millght not exist on 'userData?.users'
-          .update({ balance: userData.balance + coinCount + profit })
-          .eq("id", user.userId)
-          .single();
+  
+        try {
+          const response = await fetchWithAuth("/api/updateBalance", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: user.userId,
+              coinCount,
+              profit,
+            }),
+          });
+  
+          const data = await response.json();
+  
+          if (!response.ok) {
+            console.error("Error updating balance:", data.error);
+          }
+        } catch (error) {
+          console.error("Error updating balance:", error);
+        }
       }
-    }
-    updateBalanceUserData()
-  },[gameOver])
+    };
+  
+    updateBalanceUserData();
+  }, [gameOver]); // Runs when `gameOver` changes
+  
+
   const [speed, setSpeed] = useState(2);
   const speedRef = useRef(speed);
   useEffect(() => {
@@ -333,37 +363,45 @@ const GamePage = () => {
   const startGame = async () => {
     const data = getGameData();
     let cost = 0;
+  
+    if(!userData?.balance){
+      return
+    }
     if (data.dailyPlayCount >= FREE_PLAY_LIMIT) {
       cost = (data.dailyPlayCount - (FREE_PLAY_LIMIT - 1)) * 10000;
     }
-    // @ts-expect-error: Property 'count' might not exist on userData?.users
-    if (cost > 0 && userData?.balance < cost) {
-      alert("You don't have enough SEMZ tokens to play again.");
-      return;
-    }
+  
     if (cost > 0) {
-      // @ts-expect-error: Property 'count' might not exist on userData?.users
-      const updateDataBalance = parseInt(userData.balance) - cost;
-      const { error: updateError } = await supabase
-        .from("users")
-        .update({ balance: updateDataBalance })
-        // @ts-expect-error: Property 'count' might not exist on userData?.users
-        .eq("id", userData.id)
-        .single();
-      if (updateError) {
-        console.error("Error updating balance:", updateError);
+      try {
+        const updateDataBalance = userData?.balance - cost;
+        const response = await fetchWithAuth("/api/gameStarter", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userId: userData?.id, updateDataBalance }),
+        });
+  
+        const result = await response.json();
+  
+        if (!response.ok) {
+          alert(result.error || "Something went wrong");
+          return;
+        }
+  
+        setUserData((prev) => prev ? { ...prev, balance: result.newBalance } : prev);
+      } catch (error) {
+        console.error("API call failed:", error);
+        alert("Failed to update balance. Try again.");
         return;
       }
-      setUserData((prev) =>
-        prev ? { ...prev, balance: updateDataBalance } : prev
-      );
     }
+  
+    // Update game state
     const newDailyPlayCount = data.dailyPlayCount + 1;
-    const newGameData = { lastReset: data.lastReset, dailyPlayCount: newDailyPlayCount };
-    localStorage.setItem("gameData", JSON.stringify(newGameData));
+    localStorage.setItem("gameData", JSON.stringify({ ...data, dailyPlayCount: newDailyPlayCount }));
     setDailyPlayCount(newDailyPlayCount);
-
-    // Reset game state
+  
     setGameOver(false);
     setTime(0);
     setCoinCount(0);
@@ -375,6 +413,8 @@ const GamePage = () => {
     updatePlayer(dimensions.width / 2 - 25, dimensions.height / 2 - 25);
     setGameStarted(true);
   };
+  
+  
 
   // Render start/result screen if game hasn't started or is over
   if (!gameStarted || gameOver) {

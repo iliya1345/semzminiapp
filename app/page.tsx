@@ -1,11 +1,12 @@
 "use client";
 import { useEffect } from "react";
 import { loginWithTelegram } from "@/utils/auth";
-import { getAllRows, getDocumentData, getPurchedSkins } from "@/utils/firebaseUtils";
+import { fetchAllRows, fetchDocumentData, fetchPurchedSkins } from "@/utils/firebaseUtils";
 import HomeScreen from "@/components/pages/HomeScreen";
 import LoadingScreen from "@/components/LoadingScreen";
 import NavBar from "@/components/navbar";
 import { useUserContext } from "@/context/UserContext";
+import { createSupabaseClient } from "@/utils/supaBase";
 
 interface UserData {
   referrals: number;
@@ -21,19 +22,22 @@ interface UserData {
   tonFree:any;
 
 }
+const supabase = createSupabaseClient();
 
 export default function Home() {
+  
   const { user, setUser, userData, setUserData } = useUserContext();
+
 
   const fetchAdditionalUserData = async (
     userName: string
   ): Promise<Partial<UserData>> => {
     try {
       
-      const usersCount = await getDocumentData("userCount", "0");
-      const fetchedTaskIds = await getAllRows("tasks")
-      const purchedSkins = await getPurchedSkins(userName)
-      const tonEarnDate = await getDocumentData("app_data", "1");
+      const usersCount = await fetchDocumentData("userCount", "0");
+      const fetchedTaskIds = await fetchAllRows("tasks")
+      const purchedSkins = await fetchPurchedSkins(userName)
+      const tonEarnDate = await fetchDocumentData("app_data", "1");
 
       return {
         tasks: fetchedTaskIds.length > 0 ? fetchedTaskIds : null,
@@ -57,7 +61,7 @@ export default function Home() {
         return
       };
 
-      const userData = await getDocumentData("users", userName);
+      const userData = await fetchDocumentData("users", userName);
 
       if (!userData) throw new Error("User data not found");
 
@@ -70,16 +74,18 @@ export default function Home() {
 
       setUserData(completeUserData);
       setUser({ isLoggedIn: true, userId: userName });
+
     } catch (error) {
       console.error("Login or data fetch error:", error);
     }
   };
 
   useEffect(() => {
-    if (!user.isLoggedIn) {
-      handleLogin();
-    }
-  }, [user.isLoggedIn]);
+    handleLogin();
+  }, [])
+  
+
+
 
   if (!user.isLoggedIn) return <LoadingScreen />;
 

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Check, Loader2 } from "lucide-react";
 import { useUserContext } from "@/context/UserContext";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface TaskCardProps {
   task: {
@@ -92,7 +93,7 @@ export default function TaskCardName({ task }: TaskCardProps) {
 
     setIsLoading(true);
     try {
-      const response = await fetch("/api/claim", {
+      const response = await fetchWithAuth("/api/claim", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

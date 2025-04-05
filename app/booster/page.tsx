@@ -5,59 +5,16 @@ import NavBar from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { useUserContext } from "@/context/UserContext";
 import { cn } from "@/lib/utils";
-import { getAllRows, getPurchedSkins } from "@/utils/firebaseUtils";
-import { createSupabaseClient } from "@/utils/supaBase";
 import { Loader2, Rocket } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import WebApp from "@twa-dev/sdk";
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
-// Only access WebApp.initData on the client
-
-// Helper function to get game data from localStorage safely
-const FREE_PLAY_LIMIT = 3;
-const RESET_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours in ms
-const getGameData = () => {
-  if (typeof window === "undefined") {
-    return { lastReset: Date.now(), dailyPlayCount: 0 };
-  }
-  const stored = localStorage.getItem("gameData");
-  if (stored) {
-    try {
-      const data = JSON.parse(stored);
-      if (Date.now() - data.lastReset >= RESET_INTERVAL_MS) {
-        const newData = { lastReset: Date.now(), dailyPlayCount: 0 };
-        localStorage.setItem("gameData", JSON.stringify(newData));
-        return newData;
-      }
-      return data;
-    } catch (error) {
-      console.error("Error parsing gameData:", error);
-      const newData = { lastReset: Date.now(), dailyPlayCount: 0 };
-      localStorage.setItem("gameData", JSON.stringify(newData));
-      return newData;
-    }
-  }
-  const newData = { lastReset: Date.now(), dailyPlayCount: 0 };
-  localStorage.setItem("gameData", JSON.stringify(newData));
-  return newData;
-};
-
-// Helper function to format ms into hh:mm:ss
-const formatTime = (ms: number) => {
-  const totalSeconds = Math.floor(ms / 1000);
-  const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
-  const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
-  const seconds = String(totalSeconds % 60).padStart(2, "0");
-  return `${hours}:${minutes}:${seconds}`;
-};
-
+// Helper functions for time formatting
 const getRemainingMinutes = (purchaseDate: string, days: number): number => {
   const purchaseTime = new Date(purchaseDate);
   const expirationTime = new Date(purchaseTime.getTime() + days * 24 * 60 * 60 * 1000);
   const now = new Date();
-  const remainingTime = expirationTime.getTime() - now.getTime();
-  const remainingMinutes = Math.floor(remainingTime / 1000 / 60);
-  return remainingMinutes;
+  return Math.floor((expirationTime.getTime() - now.getTime()) / 1000 / 60);
 };
 
 const formatRemainingTime = (remainingMinutes: number): string => {
@@ -73,11 +30,13 @@ function SkinPage() {
   const [skins, setSkins] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { userData, setUserData } = useUserContext();
-  const supabase = createSupabaseClient();
 
+  // Fetch all skins from the backend API (booster table)
   const fetchAllSkins = async () => {
     try {
-      const data = await getAllRows("booster");
+      const response = await fetchWithAuth("/api/getAllRows?tableName=booster");
+      if (!response.ok) throw new Error("Failed to fetch skins");
+      const data = await response.json();
       setSkins(data || []);
     } catch (error) {
       console.error("Error fetching skins:", error);
@@ -90,68 +49,50 @@ function SkinPage() {
     fetchAllSkins();
   }, []);
 
-  // Use safe defaults for dimensions if window is not defined yet
-  const [dimensions, setDimensions] = useState({
-    width: typeof window !== "undefined" ? window.innerWidth : 0,
-    height: typeof window !== "undefined" ? window.innerHeight : 0,
-  });
-  useEffect(() => {
-    const handleResize = () =>
-      setDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Purchase skin function
+  // Purchase skin function using backend API
   const BuyCoin = async (skin: any) => {
-    setLoading(true)
+    setLoading(true);
     if (!userData) return;
+    // Optionally check client-side balance first:
     if (userData.balance < skin.price) {
       alert("You don't have enough coins to buy this skin");
+      setLoading(false);
       return;
     }
     try {
-      // @ts-expect-error: Property 'count' might not exist on 'userData?.users'
-      const { userDataPurchase, error: purchaseError } = await supabase
-        .from("purchase")
-        .insert([{ type: "skin", day: skin.days, purchase_id: skin.id, user_id: userData.id }])
-        .select();
-
-      if (purchaseError) {
-        console.error("Error inserting purchase:", purchaseError);
-        return;
-      }
-      // @ts-expect-error: Property 'count' might not exist on 'userData?.users'
-      const updateDataBalance = parseInt(userData.balance) - skin.price;
-      const { error: updateError } = await supabase
-        .from("users")
-        .update({ balance: updateDataBalance })
-        .eq("id", userData.id)
-        .single();
-
-      if (updateError) {
-        console.error("Error updating balance:", updateError);
+      // Call the backend endpoint to process the purchase
+      const response = await fetchWithAuth("/api/buySkin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: userData.id,
+          skin: { id: skin.id, days: skin.days, price: skin.price },
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        alert(result.error || "Error purchasing skin");
+        setLoading(false);
         return;
       }
       alert("Skin purchased successfully!");
-      const purchedSkins = await getPurchedSkins(userData.id.toString());
+
+      // Refresh purchased skin data after buying (if needed)
+      const purchedResponse = await fetchWithAuth(`/api/getPurchasedSkins?docId=${userData.id}`);
+      const purchedSkins = await purchedResponse.json();
+
       setUserData((prevUserData) => {
         if (!prevUserData) return prevUserData;
         return {
           ...prevUserData,
-          balance: updateDataBalance,
+          balance: result.newBalance,
           skin: purchedSkins,
         };
       });
-      console.log("Balance updated successfully:", updateDataBalance);
     } catch (error) {
       console.error("Error during transaction:", error);
     }
-    setLoading(false)
-
+    setLoading(false);
   };
 
   if (loading) {
@@ -177,7 +118,6 @@ function SkinPage() {
           <h1 className={titleStyle}>Booster</h1>
           <p className={subtitleStyle}></p>
         </div>
-
         <div>
           {userData && userData.skin && userData.skin.length !== 0 ? (
             skins.length > 0 ? (
@@ -193,7 +133,7 @@ function SkinPage() {
                       <img
                         src={skin.image_url}
                         alt="SEMZ"
-                        style={{objectFit:"cover"}}
+                        style={{ objectFit: "cover" }}
                         className="h-14 w-14 rounded-sm aspect-square"
                       />
                     </div>
@@ -206,7 +146,7 @@ function SkinPage() {
                       <p className="text-xs text-zinc-400">{skin.description}</p>
                       {userData?.skin?.purchase_id === skin.id && (
                         <p className="text-sm text-yellow-400">
-                          Active for :{" "}
+                          Active for:{" "}
                           {formatRemainingTime(
                             getRemainingMinutes(userData?.skin?.created_at, userData?.skin.day)
                           )}
@@ -244,12 +184,12 @@ function SkinPage() {
               >
                 <div className="flex items-center flex-col text-center gap-3">
                   <div className="flex h-14 w-14 aspect-square items-center justify-center">
-                      <img
-                        src={skin.image_url}
-                        alt="SEMZ"
-                        style={{objectFit:"cover"}}
-                        className="h-14 w-14 rounded-sm aspect-square"
-                      />
+                    <img
+                      src={skin.image_url}
+                      alt="SEMZ"
+                      style={{ objectFit: "cover" }}
+                      className="h-14 w-14 rounded-sm aspect-square"
+                    />
                   </div>
                   <div className="flex flex-col">
                     <h3 className="text-sm font-medium text-zinc-100">

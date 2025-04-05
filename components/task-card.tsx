@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import WebApp from "@twa-dev/sdk";
 import { Check, Loader2 } from "lucide-react";
 import { useUserContext } from "@/context/UserContext";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface TaskCardProps {
   task: {
@@ -53,7 +54,7 @@ export default function TaskCard({ task }: TaskCardProps) {
       setIsLoading(true);
       // Get initData from WebApp
       try {
-        const response = await fetch("/api/claim", {
+        const response = await fetchWithAuth("/api/claim", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
